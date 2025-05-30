@@ -3,9 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AuthorizedandUnAuthorized Map</title>
+  <title>Authorized and Unauthorized Buildings Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
     #map { height: 100vh; margin: 0; }
 
     .legend {
@@ -45,9 +50,34 @@
     .search-box button {
       padding: 5px 10px;
     }
+
+    .map-title {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 20px;
+      font-weight: bold;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+
+    .logo {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      width: 100px;
+      height: auto;
+    }
   </style>
 </head>
 <body>
+  <div class="map-title">Authorized and Unauthorized Buildings Map</div>
+  <img class="logo" src="https://seekvectors.com/storage/images/birzeit-logo/birzeit-logo.jpg" alt="Birzeit University Logo" />
   <div class="search-box">
     <input type="text" id="search-input" placeholder="ParcelNumber" />
     <button onclick="searchByParcelNumber()">بحث</button>
@@ -89,11 +119,9 @@
               if (file === 'Buildings.geojson') {
                 const props = feature.properties;
                 const distance = props.Distance;
-                const formattedDistance = distance === 0
-                  ? '0'
-                  : typeof distance === 'number'
-                    ? distance.toFixed(2)
-                    : 'N/A';
+                const formattedDistance = typeof distance === 'number'
+                  ? distance.toFixed(2)
+                  : 'N/A';
 
                 const popupContent = `
                   <b>Status:</b> ${props.Status || 'N/A'}<br>
@@ -162,4 +190,3 @@
   </script>
 </body>
 </html>
-
