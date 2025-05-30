@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Authorized and Unauthorized Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     body {
       margin: 0;
@@ -18,24 +17,16 @@
 
     .map-title {
       position: absolute;
-      top: 5px;
+      top: 10px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 1001;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.9);
       padding: 10px 20px;
       font-size: 18px;
       font-weight: bold;
       border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.2);
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .university-logo {
-      width: 40px;
-      height: auto;
     }
 
     .legend {
@@ -58,7 +49,7 @@
 
     .search-box {
       position: absolute;
-      top: 90px;
+      top: 60px;
       left: 50px;
       z-index: 1000;
       background: white;
@@ -78,28 +69,123 @@
   </style>
 </head>
 <body>
-  <div class="map-title">
-    <img class="university-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAA...==" alt="logo"/>
-    <span>Authorized and Unauthorized Map</span>
-  </div>
+  <!-- عنوان الخريطة -->
+  <div class="map-title">Authorized and Unauthorized Buildings Map</div>
 
+  <!-- مربع البحث -->
   <div class="search-box">
-    <input type="text" id="search-input" placeholder="Search...">
-    <button onclick="searchFeature()">Search</button>
+    <input type="text" id="search-input" placeholder="ParcelNumber" />
+    <button onclick="searchByParcelNumber()">بحث</button>
   </div>
 
+  <!-- الخريطة -->
   <div id="map"></div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    var map = L.map('map').setView([32.221, 35.261], 15);
+    var map = L.map('map').setView([32.0478311, 35.1635749], 14);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    function searchFeature() {
-      alert("Search not implemented");
+    const styles = {
+      'Mazare_Alnoubani.json': { color: 'blue', weight: 2, fillOpacity: 0 },
+      'Urban_Master_Plan.json': { color: 'green', weight: 2, fillOpacity: 0.3 },
+      'Block_Mazare1.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare2.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare3.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare4.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare5.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare6.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 },
+      'Roads_InSide.json': { color: 'gray', weight: 2 },
+      'Roads_OutSide.json': { color: 'black', weight: 2 }
+    };
+
+    const overlayLayers = {};
+    let buildingLayer;
+
+    Object.keys(styles).forEach(file => {
+      fetch(file)
+        .then(res => res.json())
+        .then(data => {
+          const layer = L.geoJSON(data, {
+            style: styles[file],
+            onEachFeature: function (feature, layer) {
+              if (file === 'Buildings.geojson') {
+                const props = feature.properties;
+                const distance = props.Distance;
+                const formattedDistance = distance === 0
+                  ? '0'
+                  : typeof distance === 'number'
+                    ? distance.toFixed(2)
+                    : 'N/A';
+
+                const popupContent = `
+                  <b>Status:</b> ${props.Status || 'N/A'}<br>
+                  <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
+                  <b>Location:</b> ${props.Location || 'N/A'}<br>
+                  <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
+                  <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
+                  <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
+                  <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
+                  <b>Distance:</b> ${formattedDistance}
+                `;
+                layer.bindPopup(popupContent);
+              }
+            }
+          });
+
+          const layerName = file.split('.')[0];
+          overlayLayers[layerName] = layer;
+          layer.addTo(map);
+
+          if (file === 'Buildings.geojson') {
+            buildingLayer = layer;
+          }
+        });
+    });
+
+    function searchByParcelNumber() {
+      const input = document.getElementById("search-input").value.trim();
+      if (!input || !buildingLayer) return;
+
+      let found = false;
+
+      buildingLayer.eachLayer(function (layer) {
+        const props = layer.feature.properties;
+        if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
+          map.setView(layer.getBounds().getCenter(), 17);
+          layer.openPopup();
+          found = true;
+        }
+      });
+
+      if (!found) {
+        alert("لم يتم العثور على ParcelNumber.");
+      }
     }
+
+    const legend = L.control({ position: 'bottomright' });
+
+    legend.onAdd = function (map) {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += "<b>وسيلة الإيضاح</b><br>";
+      div.innerHTML += '<i style="background: blue"></i> Mazare Alnoubani<br>';
+      div.innerHTML += '<i style="background: green"></i> Urban Master Plan<br>';
+      div.innerHTML += '<i style="background: orange"></i> Block Mazare (1–6)<br>';
+      div.innerHTML += '<i style="background: red"></i> Buildings<br>';
+      div.innerHTML += '<i style="background: gray"></i> Roads Inside<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
+      return div;
+    };
+
+    legend.addTo(map);
+
+    setTimeout(() => {
+      L.control.layers(null, overlayLayers, { collapsed: false }).addTo(map);
+    }, 1000);
   </script>
 </body>
 </html>
