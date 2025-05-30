@@ -91,14 +91,14 @@
 
     const styles = {
       'Mazare_Alnoubani.json': { color: 'black', weight: 2, fillOpacity: 0 },
-      'Urban_Master_Plan.json': { color: '#ffffcc', weight: 2, fillOpacity: 0.3 },
-      'Block_Mazare1.json': { color: '#ccffcc', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare2.json': { color: '#ccffcc', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare3.geojson': { color: '#ccffcc', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare4.geojson': { color: '#ccffcc', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare5.geojson': { color: '#ccffcc', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare6.geojson': { color: '#ccffcc', weight: 2, fillOpacity: 0.4 },
-      'Buildings.geojson': { color: '#5C4033', weight: 2, fillOpacity: 0.6 },
+      'Urban_Master_Plan.json': { color: 'green', weight: 2, fillOpacity: 0.3 },
+      'Block_Mazare1.json': { color: 'beige', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare2.json': { color: 'beige', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare3.geojson': { color: 'beige', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare4.geojson': { color: 'beige', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare5.geojson': { color: 'beige', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare6.geojson': { color: 'beige', weight: 2, fillOpacity: 0.4 },
+      'Buildings.geojson': { color: 'brown', weight: 2, fillOpacity: 0.6 },
       'Roads_InSide.json': { color: 'gray', weight: 2 },
       'Roads_OutSide.json': { color: 'gray', weight: 2 }
     };
@@ -122,7 +122,7 @@
                     ? distance.toFixed(2)
                     : 'N/A';
 
-                const popupContent = `
+                const popupContent = 
                   <b>Status:</b> ${props.Status || 'N/A'}<br>
                   <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
                   <b>Location:</b> ${props.Location || 'N/A'}<br>
@@ -131,7 +131,7 @@
                   <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
                   <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
                   <b>Distance:</b> ${formattedDistance}
-                `;
+                ;
                 layer.bindPopup(popupContent);
               }
             }
