@@ -38,7 +38,7 @@
         }
 
         .search-box input {
-            width: 120px;
+            width: 140px;
             padding: 5px;
         }
 
@@ -49,8 +49,8 @@
 </head>
 <body>
     <div class="search-box">
-        <input type="text" id="search-input" placeholder="BuildingNumber" />
-        <button onclick="searchByTargetFID()">بحث</button>
+        <input type="text" id="search-input" placeholder="رقم القطعة" />
+        <button onclick="searchByParcelNumber()">بحث</button>
     </div>
     <div id="map"></div>
 
@@ -70,91 +70,4 @@
             'Block_Mazare3.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
             'Block_Mazare4.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
             'Block_Mazare5.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-            'Block_Mazare6.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-            'Building.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 },
-            'Roads_InSide.json': { color: 'gray', weight: 2 },
-            'Roads_OutSide.json': { color: 'black', weight: 2 }
-        };
-
-        const overlayLayers = {};
-        let buildingLayer; // لتخزين طبقة المباني لأداة البحث
-
-        Object.keys(styles).forEach(file => {
-            fetch(file)
-                .then(res => res.json())
-                .then(data => {
-                    const layer = L.geoJSON(data, {
-                        style: styles[file],
-                        onEachFeature: function (feature, layer) {
-                            if (file === 'Building.geojson') {
-                                let props = feature.properties;
-                                let popupContent = `
-                                    <b>Status:</b> ${props.Status || 'N/A'}<br>
-                                    <b>CommunityN:</b> ${props.CommunityN || 'N/A'}<br>
-                                    <b>Location:</b> ${props.Location || 'N/A'}<br>
-                                    <b>BlockNumbe:</b> ${props.BlockNumbe || 'N/A'}<br>
-                                    <b>BlockName_:</b> ${props.BlockName_ || 'N/A'}<br>
-                                    <b>ParcelNumb:</b> ${props.ParcelNumb || 'N/A'}<br>
-                                    <b>NEAR_DIST:</b> ${props.NEAR_DIST || 'N/A'}<br>
-                                    <b>BuildingNumber:</b> ${props.TARGET_FID || 'N/A'}
-                                `;
-                                layer.bindPopup(popupContent);
-                            }
-                        }
-                    });
-
-                    const layerName = file.split('.')[0];
-                    overlayLayers[layerName] = layer;
-                    layer.addTo(map);
-
-                    if (file === 'Building.geojson') {
-                        buildingLayer = layer;
-                    }
-                });
-        });
-
-        // وظيفة البحث عن طريق TARGET_FID
-        function searchByTargetFID() {
-            const targetFID = document.getElementById("search-input").value.trim();
-            if (!targetFID || !buildingLayer) return;
-
-            let found = false;
-
-            buildingLayer.eachLayer(function (layer) {
-                const props = layer.feature.properties;
-                if (props.TARGET_FID != null && props.TARGET_FID.toString() === targetFID) {
-                    map.setView(layer.getBounds().getCenter(), 17);
-                    layer.openPopup();
-                    found = true;
-                }
-            });
-
-            if (!found) {
-                alert("لم يتم العثور على TARGET_FID.");
-            }
-        }
-
-        // إضافة وسيلة الإيضاح
-        const legend = L.control({ position: 'bottomright' });
-
-        legend.onAdd = function (map) {
-            const div = L.DomUtil.create('div', 'legend');
-            div.innerHTML += "<b>وسيلة الإيضاح</b><br>";
-            div.innerHTML += '<i style="background: blue"></i> Mazare Alnoubani<br>';
-            div.innerHTML += '<i style="background: green"></i> Urban Master Plan<br>';
-            div.innerHTML += '<i style="background: orange"></i> Block Mazare (1-6)<br>';
-            div.innerHTML += '<i style="background: red"></i> Buildings<br>';
-            div.innerHTML += '<i style="background: gray"></i> Roads Inside<br>';
-            div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
-            return div;
-        };
-
-        legend.addTo(map);
-
-        // إضافة أداة التحكم بالطبقات
-        setTimeout(() => {
-            L.control.layers(null, overlayLayers, { collapsed: false }).addTo(map);
-        }, 1000);
-    </script>
-</body>
-</html>
+            'Block_Mazare6.geojson': { color: 'orange', weight: 2_
