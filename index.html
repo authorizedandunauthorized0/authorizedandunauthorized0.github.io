@@ -3,10 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AuthorizedandUnAuthorized Map</title>
+  <title>Authorized and Unauthorized Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     #map { height: 100vh; margin: 0; }
+
+    .map-title {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1001;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    }
 
     .legend {
       background: white;
@@ -28,7 +42,7 @@
 
     .search-box {
       position: absolute;
-      top: 10px;
+      top: 60px;
       left: 50px;
       z-index: 1000;
       background: white;
@@ -48,10 +62,14 @@
   </style>
 </head>
 <body>
+  <!-- عنوان الخريطة -->
+  <div class="map-title">Authorized and Unauthorized Buildings Map</div>
+
   <div class="search-box">
     <input type="text" id="search-input" placeholder="ParcelNumber" />
     <button onclick="searchByParcelNumber()">بحث</button>
   </div>
+
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
