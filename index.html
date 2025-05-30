@@ -17,16 +17,24 @@
 
     .map-title {
       position: absolute;
-      top: 10px;
+      top: 5px; /* تم تقليله لرفع العنوان */
       left: 50%;
       transform: translateX(-50%);
       z-index: 1001;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       padding: 10px 20px;
       font-size: 18px;
       font-weight: bold;
       border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .university-logo {
+      width: 40px;
+      height: auto;
     }
 
     .legend {
@@ -49,7 +57,7 @@
 
     .search-box {
       position: absolute;
-      top: 60px;
+      top: 55px; /* رفع مربع البحث */
       left: 50px;
       z-index: 1000;
       background: white;
@@ -69,8 +77,11 @@
   </style>
 </head>
 <body>
-  <!-- عنوان الخريطة -->
-  <div class="map-title">Authorized and Unauthorized Buildings Map</div>
+  <!-- عنوان الخريطة مع شعار الجامعة -->
+  <div class="map-title">
+    <img src="images.png" alt="Birzeit University Logo" class="university-logo" />
+    Authorized and Unauthorized Buildings Map
+  </div>
 
   <!-- مربع البحث -->
   <div class="search-box">
