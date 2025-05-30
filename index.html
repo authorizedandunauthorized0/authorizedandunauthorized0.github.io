@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuthorizedandUnAuthorized</title>
+    <title>Buildingdamage</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         #map { height: 100vh; margin: 0; }
@@ -49,8 +49,8 @@
 </head>
 <body>
     <div class="search-box">
-        <input type="text" id="search-input" placeholder="BuildingNumber" />
-        <button onclick="searchByTargetFID()">بحث</button>
+        <input type="text" id="search-input" placeholder="Parcel Number" />
+        <button onclick="searchByParcelNumber()">بحث</button>
     </div>
     <div id="map"></div>
 
@@ -71,13 +71,13 @@
             'Block_Mazare4.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
             'Block_Mazare5.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
             'Block_Mazare6.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-            'Building.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 },
+            'buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 },
             'Roads_InSide.json': { color: 'gray', weight: 2 },
             'Roads_OutSide.json': { color: 'black', weight: 2 }
         };
 
         const overlayLayers = {};
-        let buildingLayer; // لتخزين طبقة المباني لأداة البحث
+        let buildingLayer;
 
         Object.keys(styles).forEach(file => {
             fetch(file)
@@ -86,17 +86,17 @@
                     const layer = L.geoJSON(data, {
                         style: styles[file],
                         onEachFeature: function (feature, layer) {
-                            if (file === 'Building.geojson') {
+                            if (file === 'buildings.geojson') {
                                 let props = feature.properties;
                                 let popupContent = `
                                     <b>Status:</b> ${props.Status || 'N/A'}<br>
-                                    <b>CommunityN:</b> ${props.CommunityN || 'N/A'}<br>
+                                    <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
                                     <b>Location:</b> ${props.Location || 'N/A'}<br>
-                                    <b>BlockNumbe:</b> ${props.BlockNumbe || 'N/A'}<br>
-                                    <b>BlockName_:</b> ${props.BlockName_ || 'N/A'}<br>
-                                    <b>ParcelNumb:</b> ${props.ParcelNumb || 'N/A'}<br>
-                                    <b>NEAR_DIST:</b> ${props.NEAR_DIST || 'N/A'}<br>
-                                    <b>BuildingNumber:</b> ${props.TARGET_FID || 'N/A'}
+                                    <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
+                                    <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
+                                    <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
+                                    <b>ParcelNumber:</b> ${props.parcelNumber || 'N/A'}<br>
+                                    <b>Distance:</b> ${props.Distance || 'N/A'}
                                 `;
                                 layer.bindPopup(popupContent);
                             }
@@ -107,22 +107,21 @@
                     overlayLayers[layerName] = layer;
                     layer.addTo(map);
 
-                    if (file === 'Building.geojson') {
+                    if (file === 'buildings.geojson') {
                         buildingLayer = layer;
                     }
                 });
         });
 
-        // وظيفة البحث عن طريق TARGET_FID
-        function searchByTargetFID() {
-            const targetFID = document.getElementById("search-input").value.trim();
-            if (!targetFID || !buildingLayer) return;
+        function searchByParcelNumber() {
+            const input = document.getElementById("search-input").value.trim();
+            if (!input || !buildingLayer) return;
 
             let found = false;
 
             buildingLayer.eachLayer(function (layer) {
                 const props = layer.feature.properties;
-                if (props.TARGET_FID != null && props.TARGET_FID.toString() === targetFID) {
+                if (props.parcelNumber != null && props.parcelNumber.toString() === input) {
                     map.setView(layer.getBounds().getCenter(), 17);
                     layer.openPopup();
                     found = true;
@@ -130,11 +129,10 @@
             });
 
             if (!found) {
-                alert("لم يتم العثور على TARGET_FID.");
+                alert("لم يتم العثور على Parcel Number.");
             }
         }
 
-        // إضافة وسيلة الإيضاح
         const legend = L.control({ position: 'bottomright' });
 
         legend.onAdd = function (map) {
@@ -151,10 +149,10 @@
 
         legend.addTo(map);
 
-        // إضافة أداة التحكم بالطبقات
         setTimeout(() => {
             L.control.layers(null, overlayLayers, { collapsed: false }).addTo(map);
         }, 1000);
     </script>
 </body>
 </html>
+
