@@ -3,31 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Authorized and Unauthorized Map</title>
+  <title>AuthorizedandUnAuthorized Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    #map {
-      height: 100vh;
-    }
-
-    .map-title {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1001;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 10px 20px;
-      font-size: 18px;
-      font-weight: bold;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.2);
-    }
+    #map { height: 100vh; margin: 0; }
 
     .legend {
       background: white;
@@ -49,7 +28,7 @@
 
     .search-box {
       position: absolute;
-      top: 60px;
+      top: 10px;
       left: 50px;
       z-index: 1000;
       background: white;
@@ -69,16 +48,10 @@
   </style>
 </head>
 <body>
-  <!-- عنوان الخريطة -->
-  <div class="map-title">Authorized and Unauthorized Buildings Map</div>
-
-  <!-- مربع البحث -->
   <div class="search-box">
     <input type="text" id="search-input" placeholder="ParcelNumber" />
     <button onclick="searchByParcelNumber()">بحث</button>
   </div>
-
-  <!-- الخريطة -->
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -171,7 +144,7 @@
 
     legend.onAdd = function (map) {
       const div = L.DomUtil.create('div', 'legend');
-      div.innerHTML += "<b>وسيلة الإيضاح</b><br>";
+      div.innerHTML += "<b>Legend</b><br>";
       div.innerHTML += '<i style="background: blue"></i> Mazare Alnoubani<br>';
       div.innerHTML += '<i style="background: green"></i> Urban Master Plan<br>';
       div.innerHTML += '<i style="background: orange"></i> Block Mazare (1–6)<br>';
