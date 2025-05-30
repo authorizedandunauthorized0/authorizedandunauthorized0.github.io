@@ -21,19 +21,12 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 1001;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.9);
       padding: 10px 20px;
       font-size: 18px;
       font-weight: bold;
       border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.2);
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .map-title img {
-      height: 40px;
     }
 
     .legend {
@@ -56,7 +49,7 @@
 
     .search-box {
       position: absolute;
-      top: 70px;
+      top: 60px;
       left: 50px;
       z-index: 1000;
       background: white;
@@ -76,11 +69,8 @@
   </style>
 </head>
 <body>
-  <!-- عنوان الخريطة مع الشعار -->
-  <div class="map-title">
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQYAAADACAMAAADRLT0TAAABC1BMVEX///8AAAAHYyQjHyAgHB37+/z7/Pz+/v72+Pjx9/bz9vb29vb09fX19fXv8vHv7+zv7+/v7+3u7u7t7e3t7e3s7Ozq6urq6Ojp6enp6Ofo6Ojn5+fm5+fl5eXl5OTk5OTk4+Pj4+Li4eHh4eHg4ODg4ODf39/f3t7e3t7d3d3c3NzZ2dnY2NjY2NfX19bW1tXV1dTU1NPS0tHR0tDQ0M/Pz87Ozs3Nzc3MzMy+vr27u7u6urq5ubm4uLj////qR4kjAAAEWUlEQVR4nO3di3aqQBiG4T1USQVNRUb7l//s3kEoZAJaO7fvE/vclyBFsc1vWTXPqWfEQPduP+QjGcV6LhMJpMJpPJpPJpPJpPJpPJpPJpPJpPJpPJpPJpPJpPJpPJpPJoPYVbZ75DZMbmr5I2k/jhKXYU3Qa0HzL38llwOYkFrgNo7FucXUq7zKqYreOpvXtF3Hd58NldVdUNe1VW78aq1q2rxO4MuXX/Bl1zvN1XRYtWx7rbXUS88GnTuZMJpMJpPJpPJpPJpPJpPJpPJpPJpPJpPJpPJpPJpPJpPJpPZo91V3UeX7d5dcB7KXvu5DCuldkO2AX1AcFucJx3c7xPVLVWW7KhqVK7rHPzE0V/nlc/dv22vnzsNLazUcnR1P5zXLQ3VG7qz49f5cOtUWkOv0XBcxuvcWLWZ/J1rhOr9OFRufjEK2fn3vcXfy16weZsGn5kdt+xMIcR8fMYxHMdxHMdxHMdxHMdxHMdxHMdxHMdxHMdxHMdxHMdxHMdxHMdxHMdxPM3i9zL9LR5cEAAAAASUVORK5CYII=" alt="Birzeit Logo">
-    <span>Authorized and Unauthorized Buildings Map</span>
-  </div>
+  <!-- عنوان الخريطة -->
+  <div class="map-title">Authorized and Unauthorized Buildings Map</div>
 
   <!-- مربع البحث -->
   <div class="search-box">
