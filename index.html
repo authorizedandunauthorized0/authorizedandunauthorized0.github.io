@@ -10,11 +10,9 @@
       margin: 0;
       font-family: Arial, sans-serif;
     }
-
     #map {
       height: 100vh;
     }
-
     .top-bar {
       position: absolute;
       top: 0;
@@ -27,21 +25,18 @@
       justify-content: center;
       z-index: 1002;
     }
-
     .top-bar img {
       height: 40px;
       margin-left: 20px;
       position: absolute;
       left: 10px;
     }
-
     .top-bar h1 {
       color: white;
       font-size: 20px;
       margin: 0;
       text-align: center;
     }
-
     .legend {
       background: white;
       padding: 10px;
@@ -50,7 +45,6 @@
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
-
     .legend i {
       display: inline-block;
       width: 18px;
@@ -59,7 +53,6 @@
       vertical-align: middle;
       opacity: 0.7;
     }
-
     .search-box {
       position: absolute;
       top: 70px;
@@ -70,16 +63,13 @@
       border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
-
     .search-box input {
       width: 120px;
       padding: 5px;
     }
-
     .search-box button {
       padding: 5px 10px;
     }
-
     /* تحريك أداة الزوم تحت أداة البحث */
     .leaflet-control-zoom {
       top: 140px !important; /* أقل من أداة البحث */
@@ -171,6 +161,7 @@
       if (!overlayLayers['Mazare_Alnoubani'] ||
           !overlayLayers['Urban_Master_Plan'] ||
           !overlayLayers['Roads_InSide'] ||
+          !overlayLayers['Roads_OutSide'] ||
           !buildingLayer) {
         setTimeout(addLayersInOrder, 500); // انتظر ثم حاول مرة أخرى
         return;
@@ -179,15 +170,13 @@
       // أضف الطبقات بالترتيب من الأسفل للأعلى
       overlayLayers['Mazare_Alnoubani'].addTo(map);
       overlayLayers['Urban_Master_Plan'].addTo(map);
-
-      if (overlayLayers['Roads_InSide']) overlayLayers['Roads_InSide'].addTo(map);
-      if (overlayLayers['Roads_OutSide']) overlayLayers['Roads_OutSide'].addTo(map);
-
+      overlayLayers['Roads_InSide'].addTo(map);
+      overlayLayers['Roads_OutSide'].addTo(map);
       buildingLayer.addTo(map);
       buildingLayer.bringToFront();
 
-      // إضافة أداة التحكم بالطبقات
-      L.control.layers(null, overlayLayers, { collapsed: false }).addTo(map);
+      // أداة التحكم بالطبقات مع جميع الطبقات
+      L.control.layers(null, overlayLayers, { collapsed: false, position: 'topright' }).addTo(map);
     }
 
     // بدء إضافة الطبقات بعد تأخير لإنتظار التحميل
@@ -233,3 +222,4 @@
   </script>
 </body>
 </html>
+
