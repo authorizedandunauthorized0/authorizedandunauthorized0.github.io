@@ -2,180 +2,47 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>خريطة المباني المرخصة وغير المرخصة</title>
+  <title>خريطة توزيع الطبقات</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
     #map { height: 100vh; }
-    .top-bar {
-      position: absolute; top: 0; left: 0; width: 100%; height: 60px;
-      background-color: #0057b8; display: flex; align-items: center;
-      justify-content: center; z-index: 1002;
-    }
-    .top-bar img {
-      height: 40px; margin-left: 20px;
-      position: absolute; left: 10px;
-    }
-    .top-bar h1 {
-      color: white; font-size: 20px; margin: 0;
-      text-align: center;
-    }
-    .legend {
-      background: white; padding: 10px; line-height: 1.5;
-      color: #333; border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    }
-    .legend i {
-      display: inline-block; width: 18px; height: 18px;
-      margin-right: 8px; vertical-align: middle; opacity: 0.7;
-    }
-    .search-box {
-      position: absolute; top: 70px; left: 20px; z-index: 1001;
-      background: white; padding: 10px; border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    }
-    .search-box input {
-      width: 120px; padding: 5px;
-    }
-    .search-box button {
-      padding: 5px 10px;
-    }
-    .leaflet-control-zoom {
-      top: 140px !important; left: 20px !important;
-    }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <img src="university-logo.png" alt="شعار الجامعة" />
-    <h1>Authorized And UnAuthorized Building Map</h1>
-  </div>
-
-  <div class="search-box">
-    <input type="text" id="search-input" placeholder="ParcelNumber" />
-    <button onclick="searchByParcelNumber()">بحث</button>
-  </div>
-
   <div id="map"></div>
-
+  
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    var map = L.map('map').setView([32.0478311, 35.1635749], 14);
+    // إنشاء الخريطة وتحديد المركز والتكبير
+    var map = L.map('map').setView([32.0478, 35.1635], 14);
 
+    // طبقة الأساس
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '© OpenStreetMap'
     }).addTo(map);
 
+    // أنماط الطبقات
     const styles = {
-      'Buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 },
-      'Roads_InSide.json': { color: 'gray', weight: 2 },
-      'Roads_OutSide.json': { color: 'black', weight: 2 },
-      'Urban_Master_Plan.json': { color: 'green', weight: 2, fillOpacity: 0.3 },
-      'Mazare_Alnoubani.json': { color: 'blue', weight: 2, fillOpacity: 0 }
+      mazare: { color: 'blue', weight: 1, fillOpacity: 0.1 },
+      urbanPlan: { color: 'green', weight: 2, fillOpacity: 0.2 },
+      roadsOutside: { color: 'black', weight: 2 },
+      roadsInside: { color: 'gray', weight: 2 },
+      buildings: { color: 'red', weight: 2, fillOpacity: 0.6 }
     };
 
-    const overlayLayers = {};
-    let buildingLayer;
+    // مصفوفة لتخزين الطبقات لأداة التحكم
+    let overlayLayers = {};
 
-    function loadLayer(file, style) {
-      return fetch(file)
-        .then(res => res.json())
+    // دالة تحميل الطبقات وإضافتها
+    function loadLayer(url, style, name, options = {}) {
+      fetch(url)
+        .then(response => response.json())
         .then(data => {
-          const layer = L.geoJSON(data, {
-            style: style,
-            onEachFeature: function (feature, layer) {
-              if (file === 'Buildings.geojson') {
-                const props = feature.properties;
-                const distance = props.Distance;
-                const formattedDistance = distance === 0
-                  ? '0'
-                  : typeof distance === 'number'
-                    ? distance.toFixed(2)
-                    : 'N/A';
-                const popupContent = `
-                  <b>Status:</b> ${props.Status || 'N/A'}<br>
-                  <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
-                  <b>Location:</b> ${props.Location || 'N/A'}<br>
-                  <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
-                  <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
-                  <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
-                  <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
-                  <b>Distance:</b> ${formattedDistance}
-                `;
-                layer.bindPopup(popupContent);
-              }
-            }
-          });
-          const name = file.split('.')[0];
+          const layer = L.geoJSON(data, { style: style }).addTo(map);
           overlayLayers[name] = layer;
-          if (file === 'Buildings.geojson') {
-            buildingLayer = layer;
+
+          if (options.bringToFront) {
+            layer.bringToFront();
           }
-        });
-    }
-
-    const filesOrder = [
-      'Mazare_Alnoubani.json',
-      'Urban_Master_Plan.json',
-      'Roads_OutSide.json',
-      'Roads_InSide.json',
-      'Buildings.geojson'
-    ];
-
-    Promise.all(
-      filesOrder.map(file => loadLayer(file, styles[file]))
-    ).then(() => {
-      // ترتيب الإضافة حسب أولوية الظهور (الأحواض تُضاف أولًا لتكون في الأسفل)
-      filesOrder.forEach(file => {
-        const name = file.split('.')[0];
-        overlayLayers[name].addTo(map);
-      });
-
-      // ضمان أن طبقة المباني في الأعلى
-      if (buildingLayer) {
-        buildingLayer.bringToFront();
-      }
-
-      // أداة التحكم بالطبقات
-      L.control.layers(null, overlayLayers, {
-        collapsed: false,
-        position: 'topright'
-      }).addTo(map);
-    });
-
-    function searchByParcelNumber() {
-      const input = document.getElementById("search-input").value.trim();
-      if (!input || !buildingLayer) return;
-
-      let found = false;
-      buildingLayer.eachLayer(function (layer) {
-        const props = layer.feature.properties;
-        if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
-          map.setView(layer.getBounds().getCenter(), 17);
-          layer.openPopup();
-          found = true;
-        }
-      });
-
-      if (!found) {
-        alert("لم يتم العثور على ParcelNumber.");
-      }
-    }
-
-    // الأسطورة
-    const legend = L.control({ position: 'bottomright' });
-    legend.onAdd = function () {
-      const div = L.DomUtil.create('div', 'legend');
-      div.innerHTML += "<b>Legend</b><br>";
-      div.innerHTML += '<i style="background: red"></i> Buildings<br>';
-      div.innerHTML += '<i style="background: gray"></i> Roads Inside<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
-      div.innerHTML += '<i style="background: green"></i> Urban Master Plan<br>';
-      div.innerHTML += '<i style="background: blue"></i> Mazare Alnoubani<br>';
-      return div;
-    };
-    legend.addTo(map);
-  </script>
-</body>
-</html>
+          if (options.bringToBack) {
+            layer.br
