@@ -125,6 +125,7 @@
     const overlayLayers = {};
     let buildingLayer;
 
+    // تحميل الطبقات بدون إضافتها فوراً
     Object.keys(styles).forEach(file => {
       fetch(file)
         .then(res => res.json())
@@ -158,7 +159,6 @@
 
           const layerName = file.split('.')[0];
           overlayLayers[layerName] = layer;
-          layer.addTo(map);
 
           if (file === 'Buildings.geojson') {
             buildingLayer = layer;
@@ -166,6 +166,34 @@
         });
     });
 
+    // دالة لإضافة الطبقات حسب الترتيب المطلوب
+    function addLayersInOrder() {
+      if (!overlayLayers['Mazare_Alnoubani'] ||
+          !overlayLayers['Urban_Master_Plan'] ||
+          !overlayLayers['Roads_InSide'] ||
+          !buildingLayer) {
+        setTimeout(addLayersInOrder, 500); // انتظر ثم حاول مرة أخرى
+        return;
+      }
+
+      // أضف الطبقات بالترتيب من الأسفل للأعلى
+      overlayLayers['Mazare_Alnoubani'].addTo(map);
+      overlayLayers['Urban_Master_Plan'].addTo(map);
+
+      if (overlayLayers['Roads_InSide']) overlayLayers['Roads_InSide'].addTo(map);
+      if (overlayLayers['Roads_OutSide']) overlayLayers['Roads_OutSide'].addTo(map);
+
+      buildingLayer.addTo(map);
+      buildingLayer.bringToFront();
+
+      // إضافة أداة التحكم بالطبقات
+      L.control.layers(null, overlayLayers, { collapsed: false }).addTo(map);
+    }
+
+    // بدء إضافة الطبقات بعد تأخير لإنتظار التحميل
+    setTimeout(addLayersInOrder, 1500);
+
+    // دالة البحث
     function searchByParcelNumber() {
       const input = document.getElementById("search-input").value.trim();
       if (!input || !buildingLayer) return;
@@ -186,6 +214,7 @@
       }
     }
 
+    // الأسطورة (Legend)
     const legend = L.control({ position: 'bottomright' });
 
     legend.onAdd = function (map) {
@@ -201,10 +230,6 @@
     };
 
     legend.addTo(map);
-
-    setTimeout(() => {
-      L.control.layers(null, overlayLayers, { collapsed: false }).addTo(map);
-    }, 1000);
   </script>
 </body>
 </html>
