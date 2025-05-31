@@ -15,18 +15,31 @@
       height: 100vh;
     }
 
-    .map-title {
+    .top-bar {
       position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1001;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 10px 20px;
-      font-size: 18px;
-      font-weight: bold;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: #0057b8; /* أزرق */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1002;
+    }
+
+    .top-bar img {
+      height: 40px;
+      margin-left: 20px;
+      position: absolute;
+      left: 10px;
+    }
+
+    .top-bar h1 {
+      color: white;
+      font-size: 20px;
+      margin: 0;
+      text-align: center;
     }
 
     .legend {
@@ -49,9 +62,9 @@
 
     .search-box {
       position: absolute;
-      top: 60px;
-      left: 50px;
-      z-index: 1000;
+      top: 70px;
+      left: 20px;
+      z-index: 1001;
       background: white;
       padding: 10px;
       border-radius: 5px;
@@ -69,8 +82,11 @@
   </style>
 </head>
 <body>
-  <!-- عنوان الخريطة -->
-  <div class="map-title">Authorized and Unauthorized Buildings Map</div>
+  <!-- شريط علوي يحتوي على الشعار والعنوان -->
+  <div class="top-bar">
+    <img src="university-logo.png" alt="شعار الجامعة" />
+    <h1>خريطة المباني المرخصة وغير المرخصة</h1>
+  </div>
 
   <!-- مربع البحث -->
   <div class="search-box">
