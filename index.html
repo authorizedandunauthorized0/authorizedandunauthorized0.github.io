@@ -6,74 +6,43 @@
   <title>خريطة المباني المرخصة وغير المرخصة</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-    #map {
-      height: 100vh;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #map { height: 100vh; }
     .top-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 60px;
-      background-color: #0057b8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1002;
+      position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+      background-color: #0057b8; display: flex; align-items: center;
+      justify-content: center; z-index: 1002;
     }
     .top-bar img {
-      height: 40px;
-      margin-left: 20px;
-      position: absolute;
-      left: 10px;
+      height: 40px; margin-left: 20px;
+      position: absolute; left: 10px;
     }
     .top-bar h1 {
-      color: white;
-      font-size: 20px;
-      margin: 0;
+      color: white; font-size: 20px; margin: 0;
       text-align: center;
     }
     .legend {
-      background: white;
-      padding: 10px;
-      line-height: 1.5;
-      color: #333;
-      border-radius: 5px;
+      background: white; padding: 10px; line-height: 1.5;
+      color: #333; border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
     .legend i {
-      display: inline-block;
-      width: 18px;
-      height: 18px;
-      margin-right: 8px;
-      vertical-align: middle;
-      opacity: 0.7;
+      display: inline-block; width: 18px; height: 18px;
+      margin-right: 8px; vertical-align: middle; opacity: 0.7;
     }
     .search-box {
-      position: absolute;
-      top: 70px;
-      left: 20px;
-      z-index: 1001;
-      background: white;
-      padding: 10px;
-      border-radius: 5px;
+      position: absolute; top: 70px; left: 20px; z-index: 1001;
+      background: white; padding: 10px; border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
     .search-box input {
-      width: 120px;
-      padding: 5px;
+      width: 120px; padding: 5px;
     }
     .search-box button {
       padding: 5px 10px;
     }
-    /* تحريك أداة الزوم تحت أداة البحث */
     .leaflet-control-zoom {
-      top: 140px !important; /* أقل من أداة البحث */
-      left: 20px !important;
+      top: 140px !important; left: 20px !important;
     }
   </style>
 </head>
@@ -101,27 +70,21 @@
     const styles = {
       'Mazare_Alnoubani.json': { color: 'blue', weight: 2, fillOpacity: 0 },
       'Urban_Master_Plan.json': { color: 'green', weight: 2, fillOpacity: 0.3 },
-      'Block_Mazare1.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare2.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare3.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare4.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare5.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare6.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 },
       'Roads_InSide.json': { color: 'gray', weight: 2 },
-      'Roads_OutSide.json': { color: 'black', weight: 2 }
+      'Roads_OutSide.json': { color: 'black', weight: 2 },
+      'Buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 }
     };
 
     const overlayLayers = {};
+    let layersOrder = ['Mazare_Alnoubani', 'Urban_Master_Plan', 'Roads_InSide', 'Roads_OutSide', 'Buildings'];
     let buildingLayer;
 
-    // تحميل الطبقات بدون إضافتها فوراً
-    Object.keys(styles).forEach(file => {
-      fetch(file)
+    function loadLayer(file, style) {
+      return fetch(file)
         .then(res => res.json())
         .then(data => {
           const layer = L.geoJSON(data, {
-            style: styles[file],
+            style: style,
             onEachFeature: function (feature, layer) {
               if (file === 'Buildings.geojson') {
                 const props = feature.properties;
@@ -131,7 +94,6 @@
                   : typeof distance === 'number'
                     ? distance.toFixed(2)
                     : 'N/A';
-
                 const popupContent = `
                   <b>Status:</b> ${props.Status || 'N/A'}<br>
                   <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
@@ -146,49 +108,36 @@
               }
             }
           });
-
-          const layerName = file.split('.')[0];
-          overlayLayers[layerName] = layer;
-
+          const name = file.split('.')[0];
+          overlayLayers[name] = layer;
           if (file === 'Buildings.geojson') {
             buildingLayer = layer;
           }
         });
-    });
-
-    // دالة لإضافة الطبقات حسب الترتيب المطلوب
-    function addLayersInOrder() {
-      if (!overlayLayers['Mazare_Alnoubani'] ||
-          !overlayLayers['Urban_Master_Plan'] ||
-          !overlayLayers['Roads_InSide'] ||
-          !overlayLayers['Roads_OutSide'] ||
-          !buildingLayer) {
-        setTimeout(addLayersInOrder, 500); // انتظر ثم حاول مرة أخرى
-        return;
-      }
-
-      // أضف الطبقات بالترتيب من الأسفل للأعلى
-      overlayLayers['Mazare_Alnoubani'].addTo(map);
-      overlayLayers['Urban_Master_Plan'].addTo(map);
-      overlayLayers['Roads_InSide'].addTo(map);
-      overlayLayers['Roads_OutSide'].addTo(map);
-      buildingLayer.addTo(map);
-      buildingLayer.bringToFront();
-
-      // أداة التحكم بالطبقات مع جميع الطبقات
-      L.control.layers(null, overlayLayers, { collapsed: false, position: 'topright' }).addTo(map);
     }
 
-    // بدء إضافة الطبقات بعد تأخير لإنتظار التحميل
-    setTimeout(addLayersInOrder, 1500);
+    Promise.all(
+      Object.entries(styles).map(([file, style]) => loadLayer(file, style))
+    ).then(() => {
+      // أضف كل الطبقات إلى الخريطة بالترتيب الصحيح
+      layersOrder.forEach(name => {
+        overlayLayers[name].addTo(map);
+      });
 
-    // دالة البحث
+      // تأكد أن المباني فوق كل الطبقات
+      if (buildingLayer) {
+        buildingLayer.bringToFront();
+      }
+
+      // أداة التحكم بالطبقات
+      L.control.layers(null, overlayLayers, { collapsed: false, position: 'topright' }).addTo(map);
+    });
+
     function searchByParcelNumber() {
       const input = document.getElementById("search-input").value.trim();
       if (!input || !buildingLayer) return;
 
       let found = false;
-
       buildingLayer.eachLayer(function (layer) {
         const props = layer.feature.properties;
         if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
@@ -203,23 +152,19 @@
       }
     }
 
-    // الأسطورة (Legend)
+    // الأسطورة
     const legend = L.control({ position: 'bottomright' });
-
-    legend.onAdd = function (map) {
+    legend.onAdd = function () {
       const div = L.DomUtil.create('div', 'legend');
       div.innerHTML += "<b>Legend</b><br>";
       div.innerHTML += '<i style="background: blue"></i> Mazare Alnoubani<br>';
       div.innerHTML += '<i style="background: green"></i> Urban Master Plan<br>';
-      div.innerHTML += '<i style="background: orange"></i> Block Mazare (1–6)<br>';
-      div.innerHTML += '<i style="background: red"></i> Buildings<br>';
       div.innerHTML += '<i style="background: gray"></i> Roads Inside<br>';
       div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
+      div.innerHTML += '<i style="background: red"></i> Buildings<br>';
       return div;
     };
-
     legend.addTo(map);
   </script>
 </body>
 </html>
-
