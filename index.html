@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Authorized and Unauthorized Map</title>
+  <title>خريطة المباني المرخصة وغير المرخصة</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body {
@@ -21,7 +21,7 @@
       left: 0;
       width: 100%;
       height: 60px;
-      background-color: #0057b8; /* أزرق */
+      background-color: #0057b8;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -79,22 +79,25 @@
     .search-box button {
       padding: 5px 10px;
     }
+
+    /* تحريك أداة الزوم تحت أداة البحث */
+    .leaflet-control-zoom {
+      top: 140px !important; /* أقل من أداة البحث */
+      left: 20px !important;
+    }
   </style>
 </head>
 <body>
-  <!-- شريط علوي يحتوي على الشعار والعنوان -->
   <div class="top-bar">
     <img src="university-logo.png" alt="شعار الجامعة" />
-    <h1>Authorized and unauthorized Building Map</h1>
+    <h1>خريطة المباني المرخصة وغير المرخصة</h1>
   </div>
 
-  <!-- مربع البحث -->
   <div class="search-box">
     <input type="text" id="search-input" placeholder="ParcelNumber" />
     <button onclick="searchByParcelNumber()">بحث</button>
   </div>
 
-  <!-- الخريطة -->
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
