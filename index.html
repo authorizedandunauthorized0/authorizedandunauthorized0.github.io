@@ -92,8 +92,8 @@
 
     .chart-box {
       position: absolute;
-      top: 70px;
-      right: 20px;
+      bottom: 20px;
+      left: 20px;
       z-index: 1001;
       background: white;
       padding: 10px;
@@ -213,8 +213,6 @@
 
         if (file === 'Buildings.geojson') {
           buildingLayer = layer;
-
-          // بعد إضافة جميع المباني، عرض الرسم البياني
           setTimeout(() => {
             displayStats();
           }, 500);
@@ -250,6 +248,15 @@
             title: {
               display: true,
               text: 'نسبة حالة المباني'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw;
+                  const percentage = ((value / total) * 100).toFixed(2);
+                  return `${context.label}: ${value} (${percentage}%)`;
+                }
+              }
             }
           }
         }
