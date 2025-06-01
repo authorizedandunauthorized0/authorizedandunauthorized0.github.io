@@ -11,9 +11,11 @@
       margin: 0;
       font-family: Arial, sans-serif;
     }
+
     #map {
       height: 100vh;
     }
+
     .top-bar {
       position: absolute;
       top: 0;
@@ -26,18 +28,21 @@
       justify-content: center;
       z-index: 1002;
     }
+
     .top-bar img {
       height: 40px;
       margin-left: 20px;
       position: absolute;
       left: 10px;
     }
+
     .top-bar h1 {
       color: white;
       font-size: 20px;
       margin: 0;
       text-align: center;
     }
+
     .legend {
       background: white;
       padding: 10px;
@@ -46,6 +51,7 @@
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
+
     .legend i {
       display: inline-block;
       width: 18px;
@@ -54,6 +60,7 @@
       vertical-align: middle;
       opacity: 0.7;
     }
+
     .search-box {
       position: absolute;
       top: 70px;
@@ -64,46 +71,83 @@
       border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
+
     .search-box input {
       width: 120px;
       padding: 5px;
     }
+
     .search-box button {
       padding: 5px 10px;
     }
+
     .leaflet-control-zoom {
       top: 140px !important;
       left: 20px !important;
     }
+
     .leaflet-control-layers {
       margin-top: 100px !important;
     }
+
     .chart-box {
       position: absolute;
       bottom: 20px;
       left: 20px;
       z-index: 1001;
       background: white;
-      padding: 8px;
+      padding: 10px;
       border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
-      width: 180px;
+      width: 210px;
     }
+
     .chart-box canvas {
       width: 100% !important;
       height: auto !important;
     }
+
     .chart-box p {
       margin: 5px 0;
       text-align: center;
       font-weight: bold;
+    }
+
+    /* تحريك أداة التحكم للطبقات كأيقونة في أعلى أقصى اليمين */
+    .leaflet-control-layers {
+      top: 10px !important;
+      right: 10px !important;
+      left: auto !important;
+      width: 36px !important; /* صغير كأيقونة */
+      height: 36px !important;
+      overflow: hidden;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+
+    .leaflet-control-layers-expanded {
+      width: 200px !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+
+    /* أيقونة الطبقات */
+    .leaflet-control-layers-toggle {
+      background-image: url('https://cdn-icons-png.flaticon.com/512/32/32195.png');
+      background-size: 24px 24px;
+      background-repeat: no-repeat;
+      background-position: center;
+      width: 36px !important;
+      height: 36px !important;
+      text-indent: -9999px;
     }
   </style>
 </head>
 <body>
   <div class="top-bar">
     <img src="https://raw.githubusercontent.com/authorizedandunauthorized0/authorizedandunauthorized0.github.io/main/university-logo.png" alt="شعار الجامعة" />
-    <h1>Authorized And UnAuthorized Building Map</h1>
+    <h1>خريطة المباني المرخصة وغير المرخصة</h1>
   </div>
 
   <div class="search-box">
@@ -120,7 +164,12 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    let map;
+    var map = L.map('map').setView([32.0478311, 35.1635749], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
     const styles = {
       'Mazare_Alnoubani.json': { color: 'blue', weight: 2, fillOpacity: 0 },
       'Urban_Master_Plan.json': { color: 'green', weight: 2, fillOpacity: 0.3 },
@@ -152,25 +201,12 @@
     const overlayLayers = {};
     let buildingLayer;
     let statusCounts = {};
-
-    // لتخزين إحداثيات مبنى ParcelNumber=80
-    let centerCoordinates = null;
+    let allLayersBounds = [];
 
     async function loadLayers() {
       for (const file of fileOrder) {
         const res = await fetch(file);
         const data = await res.json();
-
-        // ابحث عن المبنى رقم 80 في ملف المباني
-        if (file === 'Buildings.geojson') {
-          for (const feature of data.features) {
-            if (feature.properties.ParcelNumber && feature.properties.ParcelNumber.toString() === "80") {
-              // جلب مركز الشكل (أو نقطة الإحداثيات)
-              centerCoordinates = getFeatureCenter(feature);
-              break;
-            }
-          }
-        }
 
         const layer = L.geoJSON(data, {
           style: styles[file],
@@ -185,14 +221,11 @@
                   : 'N/A';
 
               const popupContent = `
-                <b>Status:</b> ${props.Status || 'N/A'}<br>
-                <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
-                <b>Location:</b> ${props.Location || 'N/A'}<br>
-                <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
-                <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
-                <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
-                <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
-                <b>Distance:</b> ${formattedDistance}
+                <b>الحالة:</b> ${props.Status || 'N/A'}<br>
+                <b>اسم المجتمع:</b> ${props.CommunityName || 'N/A'}<br>
+                <b>الموقع:</b> ${props.Location || 'N/A'}<br>
+                <b>رقم القطعة:</b> ${props.ParcelNumber || 'N/A'}<br>
+                <b>المسافة:</b> ${formattedDistance}
               `;
               layer.bindPopup(popupContent);
 
@@ -204,125 +237,89 @@
 
         const layerName = file.split('.')[0];
         overlayLayers[layerName] = layer;
+        layer.addTo(map);
 
-        // لا تضف الطبقات على الخريطة الآن لتأخير الضبط
-
-        if (file === 'Buildings.geojson') {
-          buildingLayer = layer;
-        }
+        // جمع حدود الطبقات لحساب الباوندز الكلي
+        if (layer.getBounds && !layer.getBounds().isValid()) continue;
+        if (layer.getBounds) allLayersBounds.push(layer.getBounds());
       }
 
-      // بعد تحميل كل الطبقات
-
-      // إنشاء الخريطة مركزها إحداثيات مبنى رقم 80 إذا وجدت، وإلا مركز عام
-      if (centerCoordinates) {
-        map = L.map('map').setView(centerCoordinates, 17);
-      } else {
-        map = L.map('map').setView([32.0478311, 35.1635749], 14);
-      }
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-
-      // إضافة الطبقات حسب الترتيب
-      for (const layerName of Object.keys(overlayLayers)) {
-        overlayLayers[layerName].addTo(map);
-      }
-
-      // إضافة الأسطورة
-      addLegend();
-
-      // تحديث عداد الحالة
-      document.getElementById('total-count').textContent = Object.values(statusCounts).reduce((a,b) => a+b, 0);
-
-      drawChart();
-
+      updateChart();
+      fitMapToAllLayers();
     }
 
-    // دالة لحساب مركز الشكل (لنقاط متعددة أو نقطة واحدة)
-    function getFeatureCenter(feature) {
-      const geometry = feature.geometry;
-      if (geometry.type === "Point") {
-        return [geometry.coordinates[1], geometry.coordinates[0]];
-      } else if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
-        // حساب مركز المضلعات (يمكننا حساب المتوسط البسيط للنقاط)
-        let coords = [];
-        if (geometry.type === "Polygon") {
-          coords = geometry.coordinates[0]; // الحلقة الأولى
-        } else if (geometry.type === "MultiPolygon") {
-          coords = geometry.coordinates[0][0]; // أول حلقة لأول مضلع
-        }
-        let latSum = 0, lngSum = 0;
-        coords.forEach(coord => {
-          lngSum += coord[0];
-          latSum += coord[1];
-        });
-        return [latSum / coords.length, lngSum / coords.length];
+    function fitMapToAllLayers() {
+      if (allLayersBounds.length === 0) return;
+      let combinedBounds = allLayersBounds[0];
+      for (let i = 1; i < allLayersBounds.length; i++) {
+        combinedBounds = combinedBounds.extend(allLayersBounds[i]);
       }
-      return [32.0478311, 35.1635749]; // مركز افتراضي في حال عدم معرفة
+      map.fitBounds(combinedBounds, { padding: [50, 50] });
     }
 
-    function addLegend() {
-      const legend = L.control({position: 'bottomright'});
-      legend.onAdd = function(map) {
-        const div = L.DomUtil.create('div', 'legend');
-        div.innerHTML = `
-          <i style="background:red"></i> المباني<br>
-          <i style="background:orange"></i> المخططات<br>
-          <i style="background:blue"></i> المزارع<br>
-          <i style="background:gray"></i> الطرق الداخلية<br>
-          <i style="background:black"></i> الطرق الخارجية<br>
-          <i style="background:green"></i> المخطط الرئيسي<br>
-        `;
-        return div;
-      };
-      legend.addTo(map);
-    }
-
-    function drawChart() {
+    function updateChart() {
       const ctx = document.getElementById('statusChart').getContext('2d');
-      new Chart(ctx, {
+      const labels = Object.keys(statusCounts);
+      const data = Object.values(statusCounts);
+
+      document.getElementById('total-count').textContent = data.reduce((a,b) => a+b, 0);
+
+      if (window.statusChart) {
+        window.statusChart.destroy();
+      }
+
+      window.statusChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: Object.keys(statusCounts),
+          labels: labels,
           datasets: [{
-            label: 'حالة المباني',
-            data: Object.values(statusCounts),
-            backgroundColor: ['green', 'red', 'orange', 'gray', 'blue', 'purple', 'yellow']
+            label: 'الحالة',
+            data: data,
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.6)',
+              'rgba(54, 162, 235, 0.6)',
+              'rgba(255, 206, 86, 0.6)',
+              'rgba(75, 192, 192, 0.6)',
+              'rgba(153, 102, 255, 0.6)',
+              'rgba(255, 159, 64, 0.6)'
+            ],
+            borderWidth: 1
           }]
         },
         options: {
           responsive: true,
           plugins: {
             legend: {
-              position: 'bottom'
+              position: 'bottom',
             }
           }
         }
       });
     }
 
-    function searchByParcelNumber() {
-      const searchValue = document.getElementById('search-input').value.trim();
-      if (!searchValue) return;
+    // إضافة أداة التحكم كأيقونة في أعلى يمين الخريطة
+    var layersControl = L.control.layers(null, overlayLayers, { collapsed: true }).addTo(map);
 
-      let foundFeature = null;
-      buildingLayer.eachLayer(layer => {
-        if (layer.feature.properties.ParcelNumber && layer.feature.properties.ParcelNumber.toString() === searchValue) {
-          foundFeature = layer;
+    loadLayers();
+
+    // وظيفة البحث بالParcelNumber
+    function searchByParcelNumber() {
+      const parcelNumber = document.getElementById('search-input').value.trim();
+      if (!parcelNumber) return;
+
+      let found = false;
+      overlayLayers['Buildings'].eachLayer(layer => {
+        if (layer.feature && layer.feature.properties && layer.feature.properties.ParcelNumber === parcelNumber) {
+          map.fitBounds(layer.getBounds());
+          layer.openPopup();
+          found = true;
         }
       });
 
-      if (foundFeature) {
-        map.fitBounds(foundFeature.getBounds());
-        foundFeature.openPopup();
-      } else {
-        alert("لم يتم العثور على المبنى بهذا الرقم.");
+      if (!found) {
+        alert('لم يتم العثور على رقم القطعة المطلوب');
       }
     }
-
-    loadLayers();
   </script>
 </body>
 </html>
