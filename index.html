@@ -1,101 +1,149 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
-  <title>Map Layer Order</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>خريطة المباني المرخصة وغير المرخصة</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
     #map {
       height: 100vh;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: #0057b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1002;
+    }
+
+    .top-bar img {
+      height: 40px;
+      margin-left: 20px;
+      position: absolute;
+      left: 10px;
+    }
+
+    .top-bar h1 {
+      color: white;
+      font-size: 20px;
+      margin: 0;
+      text-align: center;
+    }
+
+    .legend {
+      background: white;
+      padding: 10px;
+      line-height: 1.5;
+      color: #333;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .legend i {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+      vertical-align: middle;
+      opacity: 0.7;
+    }
+
+    .search-box {
+      position: absolute;
+      top: 70px;
+      left: 20px;
+      z-index: 1001;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+
+    .search-box input {
+      width: 120px;
+      padding: 5px;
+    }
+
+    .search-box button {
+      padding: 5px 10px;
+    }
+
+    .leaflet-control-zoom {
+      top: 140px !important;
+      left: 20px !important;
+    }
+
+    .leaflet-control-layers {
+      margin-top: 100px !important;
     }
   </style>
 </head>
 <body>
+  <div class="top-bar">
+    <img src="https://raw.githubusercontent.com/authorizedandunauthorized0/authorizedandunauthorized0.github.io/main/university-logo.png" alt="شعار الجامعة" />
+    <h1>Authorized And UnAuthorized Building Map</h1>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="search-input" placeholder="ParcelNumber" />
+    <button onclick="searchByParcelNumber()">بحث</button>
+  </div>
+
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([31.9, 35.2], 13);
+    var map = L.map('map').setView([32.0478311, 35.1635749], 14);
 
-    // إضافة طبقة الأساس
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // ترتيب الملفات من الأعلى إلى الأسفل
     const filesOrder = [
       'Mazare_Alnoubani.json',
-      'Block_Mazare6.geojson',
-      'Block_Mazare5.geojson',
-      'Block_Mazare4.geojson',
-      'Block_Mazare3.geojson',
-      'Block_Mazare2.json',
-      'Block_Mazare1.json',
       'Urban_Master_Plan.json',
+      'Block_Mazare1.json',
+      'Block_Mazare2.json',
+      'Block_Mazare3.geojson',
+      'Block_Mazare4.geojson',
+      'Block_Mazare5.geojson',
+      'Block_Mazare6.geojson',
       'Roads_OutSide.json',
       'Roads_InSide.json',
-      'Buildings.geojson'  // تكون في الأسفل
+      'Buildings.geojson'
     ];
 
     const styles = {
-      'Buildings.geojson': {
-        color: 'gray',
-        weight: 1,
-        fillOpacity: 0.5
-      },
-      'Roads_InSide.json': {
-        color: 'black',
-        weight: 1
-      },
-      'Roads_OutSide.json': {
-        color: 'black',
-        weight: 1
-      },
-      'Urban_Master_Plan.json': {
-        color: 'orange',
-        weight: 1,
-        fillOpacity: 0
-      },
-      'Block_Mazare1.json': {
-        color: '#1f78b4',
-        weight: 2,
-        fillOpacity: 0
-      },
-      'Block_Mazare2.json': {
-        color: '#33a02c',
-        weight: 2,
-        fillOpacity: 0
-      },
-      'Block_Mazare3.geojson': {
-        color: '#e31a1c',
-        weight: 2,
-        fillOpacity: 0
-      },
-      'Block_Mazare4.geojson': {
-        color: '#ff7f00',
-        weight: 2,
-        fillOpacity: 0
-      },
-      'Block_Mazare5.geojson': {
-        color: '#6a3d9a',
-        weight: 2,
-        fillOpacity: 0
-      },
-      'Block_Mazare6.geojson': {
-        color: '#a6cee3',
-        weight: 2,
-        fillOpacity: 0
-      },
-      'Mazare_Alnoubani.json': {
-        color: 'red',
-        weight: 2,
-        fillOpacity: 0
-      }
+      'Mazare_Alnoubani.json': { color: 'blue', weight: 2, fillOpacity: 0 },
+      'Urban_Master_Plan.json': { color: 'green', weight: 2, fillOpacity: 0.3 },
+      'Block_Mazare1.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare2.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare3.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare4.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare5.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare6.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Roads_InSide.json': { color: 'gray', weight: 2 },
+      'Roads_OutSide.json': { color: 'black', weight: 2 },
+      'Buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 }
     };
 
     const overlayLayers = {};
-    let buildingLayer = null;
+    let buildingLayer;
+    let mazareLayer;
+
+    let buildingFeatures = [];
 
     filesOrder.forEach(file => {
       fetch(file)
@@ -106,13 +154,7 @@
             onEachFeature: function (feature, layer) {
               if (file === 'Buildings.geojson') {
                 const props = feature.properties;
-                const distance = props.Distance;
-                const formattedDistance = distance === 0
-                  ? '0'
-                  : typeof distance === 'number'
-                    ? distance.toFixed(2)
-                    : 'N/A';
-
+                buildingFeatures.push(feature); // اجمع كل المباني
                 const popupContent = `
                   <b>Status:</b> ${props.Status || 'N/A'}<br>
                   <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
@@ -121,7 +163,7 @@
                   <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
                   <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
                   <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
-                  <b>Distance:</b> ${formattedDistance}
+                  <b>Distance:</b> ${props.Distance?.toFixed(2) || 'N/A'}
                 `;
                 layer.bindPopup(popupContent);
               }
@@ -132,16 +174,40 @@
           overlayLayers[layerName] = layer;
           layer.addTo(map);
 
-          // اجعل المباني في أسفل كل الطبقات
           if (file === 'Buildings.geojson') {
             buildingLayer = layer;
-            layer.bringToBack();
+            layer.bringToFront();
+          }
+
+          if (file === 'Mazare_Alnoubani.json') {
+            mazareLayer = layer;
+          }
+
+          // عندما يتم تحميل كل الطبقات، نفذ تحليل المناطق
+          if (file === 'Buildings.geojson' && mazareLayer) {
+            setTimeout(() => checkZonesWithoutBuildings(), 1000);
           }
         });
     });
 
-    // يمكنك لاحقًا إضافة control لعرض الطبقات إذا رغبت
-    // L.control.layers(null, overlayLayers).addTo(map);
-  </script>
-</body>
-</html>
+    function searchByParcelNumber() {
+      const input = document.getElementById("search-input").value.trim();
+      if (!input || !buildingLayer) return;
+
+      let found = false;
+
+      buildingLayer.eachLayer(function (layer) {
+        const props = layer.feature.properties;
+        if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
+          map.setView(layer.getBounds().getCenter(), 17);
+          layer.openPopup();
+          found = true;
+        }
+      });
+
+      if (!found) {
+        alert("لم يتم العثور على ParcelNumber.");
+      }
+    }
+
+    function checkZonesWithou
