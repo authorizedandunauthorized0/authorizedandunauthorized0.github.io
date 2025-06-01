@@ -49,6 +49,10 @@
       color: #333;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1003;
     }
 
     .legend i {
@@ -84,12 +88,11 @@
       top: 140px !important;
       left: 20px !important;
     }
-    
+
     .leaflet-control-layers {
       margin-top: 100px !important;
     }
 
-    /* صندوق الإحصائيات الجديد أسفل اليسار */
     #stats-box {
       position: absolute;
       bottom: 20px;
@@ -104,6 +107,7 @@
       min-width: 220px;
       line-height: 1.5;
     }
+
     #stats-box b {
       color: #0057b8;
     }
@@ -129,6 +133,15 @@
     <div>عدد المباني غير المرخصة: <b id="unauthorized-buildings">0</b></div>
     <div>النسبة المئوية للمرخصة: <b id="percent-authorized">0%</b></div>
     <div>النسبة المئوية لغير المرخصة: <b id="percent-unauthorized">0%</b></div>
+  </div>
+
+  <!-- الليجند -->
+  <div class="legend">
+    <i style="background: red"></i> المباني<br>
+    <i style="background: orange"></i> الكتل<br>
+    <i style="background: green"></i> المخطط الهيكلي<br>
+    <i style="background: gray"></i> الطرق الداخلية<br>
+    <i style="background: black"></i> الطرق الخارجية
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -175,7 +188,6 @@
         const res = await fetch(file);
         const data = await res.json();
 
-        // إذا هذا ملف المباني، نعد الإحصائيات
         if (file === 'Buildings.geojson') {
           countBuildingsStats(data.features);
         }
@@ -203,8 +215,6 @@
                 <b>Distance:</b> ${formattedDistance}
               `;
               layer.bindPopup(popupContent);
-
-              // إزالة التلوين حسب الحالة - لا نفعل أي شيء هنا
             }
           }
         });
@@ -217,6 +227,8 @@
           buildingLayer = layer;
         }
       }
+
+      L.control.layers(null, overlayLayers).addTo(map);
     }
 
     function countBuildingsStats(features) {
@@ -233,7 +245,6 @@
       const percentAuthorized = total === 0 ? 0 : ((authorizedCount / total) * 100).toFixed(1);
       const percentUnauthorized = total === 0 ? 0 : ((unauthorizedCount / total) * 100).toFixed(1);
 
-      // تحديث النص في صندوق الإحصائيات
       document.getElementById('total-buildings').textContent = total;
       document.getElementById('authorized-buildings').textContent = authorizedCount;
       document.getElementById('unauthorized-buildings').textContent = unauthorizedCount;
