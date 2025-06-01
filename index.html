@@ -87,7 +87,10 @@
     }
 
     .leaflet-control-layers {
-      margin-top: 100px !important;
+      margin-top: 60px !important; /* لضبطها أسفل شريط العنوان */
+      z-index: 1003 !important;    /* أعلى من شريط العنوان (1002) */
+      box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+      border-radius: 5px;
     }
 
     .chart-box {
@@ -112,42 +115,12 @@
       text-align: center;
       font-weight: bold;
     }
-
-    /* تحريك أداة التحكم للطبقات كأيقونة في أعلى أقصى اليمين */
-    .leaflet-control-layers {
-      top: 10px !important;
-      right: 10px !important;
-      left: auto !important;
-      width: 36px !important; /* صغير كأيقونة */
-      height: 36px !important;
-      overflow: hidden;
-      border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-      cursor: pointer;
-    }
-
-    .leaflet-control-layers-expanded {
-      width: 200px !important;
-      height: auto !important;
-      overflow: visible !important;
-    }
-
-    /* أيقونة الطبقات */
-    .leaflet-control-layers-toggle {
-      background-image: url('https://cdn-icons-png.flaticon.com/512/32/32195.png');
-      background-size: 24px 24px;
-      background-repeat: no-repeat;
-      background-position: center;
-      width: 36px !important;
-      height: 36px !important;
-      text-indent: -9999px;
-    }
   </style>
 </head>
 <body>
   <div class="top-bar">
     <img src="https://raw.githubusercontent.com/authorizedandunauthorized0/authorizedandunauthorized0.github.io/main/university-logo.png" alt="شعار الجامعة" />
-    <h1>خريطة المباني المرخصة وغير المرخصة</h1>
+    <h1>Authorized And UnAuthorized Building Map</h1>
   </div>
 
   <div class="search-box">
@@ -201,7 +174,6 @@
     const overlayLayers = {};
     let buildingLayer;
     let statusCounts = {};
-    let allLayersBounds = [];
 
     async function loadLayers() {
       for (const file of fileOrder) {
@@ -221,11 +193,14 @@
                   : 'N/A';
 
               const popupContent = `
-                <b>الحالة:</b> ${props.Status || 'N/A'}<br>
-                <b>اسم المجتمع:</b> ${props.CommunityName || 'N/A'}<br>
-                <b>الموقع:</b> ${props.Location || 'N/A'}<br>
-                <b>رقم القطعة:</b> ${props.ParcelNumber || 'N/A'}<br>
-                <b>المسافة:</b> ${formattedDistance}
+                <b>Status:</b> ${props.Status || 'N/A'}<br>
+                <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
+                <b>Location:</b> ${props.Location || 'N/A'}<br>
+                <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
+                <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
+                <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
+                <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
+                <b>Distance:</b> ${formattedDistance}
               `;
               layer.bindPopup(popupContent);
 
@@ -239,51 +214,27 @@
         overlayLayers[layerName] = layer;
         layer.addTo(map);
 
-        // جمع حدود الطبقات لحساب الباوندز الكلي
-        if (layer.getBounds && !layer.getBounds().isValid()) continue;
-        if (layer.getBounds) allLayersBounds.push(layer.getBounds());
+        if (file === 'Buildings.geojson') {
+          buildingLayer = layer;
+          setTimeout(() => {
+            displayStats();
+          }, 500);
+        }
       }
-
-      updateChart();
-      fitMapToAllLayers();
     }
 
-    function fitMapToAllLayers() {
-      if (allLayersBounds.length === 0) return;
-      let combinedBounds = allLayersBounds[0];
-      for (let i = 1; i < allLayersBounds.length; i++) {
-        combinedBounds = combinedBounds.extend(allLayersBounds[i]);
-      }
-      map.fitBounds(combinedBounds, { padding: [50, 50] });
-    }
+    function displayStats() {
+      const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+      document.getElementById("total-count").textContent = total;
 
-    function updateChart() {
       const ctx = document.getElementById('statusChart').getContext('2d');
-      const labels = Object.keys(statusCounts);
-      const data = Object.values(statusCounts);
-
-      document.getElementById('total-count').textContent = data.reduce((a,b) => a+b, 0);
-
-      if (window.statusChart) {
-        window.statusChart.destroy();
-      }
-
-      window.statusChart = new Chart(ctx, {
-        type: 'doughnut',
+      new Chart(ctx, {
+        type: 'pie',
         data: {
-          labels: labels,
+          labels: Object.keys(statusCounts),
           datasets: [{
-            label: 'الحالة',
-            data: data,
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.6)',
-              'rgba(54, 162, 235, 0.6)',
-              'rgba(255, 206, 86, 0.6)',
-              'rgba(75, 192, 192, 0.6)',
-              'rgba(153, 102, 255, 0.6)',
-              'rgba(255, 159, 64, 0.6)'
-            ],
-            borderWidth: 1
+            data: Object.values(statusCounts),
+            backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#6c757d']
           }]
         },
         options: {
@@ -291,35 +242,71 @@
           plugins: {
             legend: {
               position: 'bottom',
+              labels: {
+                font: {
+                  size: 12
+                }
+              }
+            },
+            title: {
+              display: true,
+              text: 'نسبة حالة المباني'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw;
+                  const percentage = ((value / total) * 100).toFixed(2);
+                  return `${context.label}: ${value} (${percentage}%)`;
+                }
+              }
             }
           }
         }
       });
     }
 
-    // إضافة أداة التحكم كأيقونة في أعلى يمين الخريطة
-    var layersControl = L.control.layers(null, overlayLayers, { collapsed: true }).addTo(map);
-
-    loadLayers();
-
-    // وظيفة البحث بالParcelNumber
     function searchByParcelNumber() {
-      const parcelNumber = document.getElementById('search-input').value.trim();
-      if (!parcelNumber) return;
+      const input = document.getElementById("search-input").value.trim();
+      if (!input || !buildingLayer) return;
 
       let found = false;
-      overlayLayers['Buildings'].eachLayer(layer => {
-        if (layer.feature && layer.feature.properties && layer.feature.properties.ParcelNumber === parcelNumber) {
-          map.fitBounds(layer.getBounds());
+
+      buildingLayer.eachLayer(function (layer) {
+        const props = layer.feature.properties;
+        if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
+          map.setView(layer.getBounds().getCenter(), 17);
           layer.openPopup();
           found = true;
         }
       });
 
       if (!found) {
-        alert('لم يتم العثور على رقم القطعة المطلوب');
+        alert("لم يتم العثور على ParcelNumber.");
       }
     }
+
+    const legend = L.control({ position: 'bottomright' });
+
+    legend.onAdd = function (map) {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += "<b>Legend</b><br>";
+      div.innerHTML += '<i style="background: blue"></i> Mazare Alnoubani<br>';
+      div.innerHTML += '<i style="background: green"></i> Urban Master Plan<br>';
+      div.innerHTML += '<i style="background: orange"></i> Block Mazare (1–6)<br>';
+      div.innerHTML += '<i style="background: red"></i> Buildings<br>';
+      div.innerHTML += '<i style="background: gray"></i> Roads Inside<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
+      return div;
+    };
+
+    legend.addTo(map);
+
+    setTimeout(() => {
+      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
+    }, 1000);
+
+    loadLayers();
   </script>
 </body>
 </html>
