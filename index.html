@@ -1,274 +1,150 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>خريطة المباني المرخصة وغير المرخصة</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <meta charset="utf-8" />
+  <title>خريطة توزيع المباني</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
     #map {
       height: 100vh;
-    }
-
-    .top-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 60px;
-      background-color: #0057b8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1002;
-    }
-
-    .top-bar img {
-      height: 40px;
-      margin-left: 20px;
-      position: absolute;
-      left: 10px;
-    }
-
-    .top-bar h1 {
-      color: white;
-      font-size: 20px;
-      margin: 0;
-      text-align: center;
+      direction: rtl;
     }
 
     .legend {
-      background: white;
+      position: absolute;
+      bottom: 30px;
+      right: 10px;
+      background-color: white;
       padding: 10px;
-      line-height: 1.5;
+      font-size: 14px;
+      line-height: 18px;
       color: #333;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1003;
     }
 
     .legend i {
-      display: inline-block;
       width: 18px;
       height: 18px;
-      margin-right: 8px;
-      vertical-align: middle;
+      float: right;
+      margin-left: 8px;
       opacity: 0.7;
     }
 
-    .search-box {
+    .info-box {
       position: absolute;
-      top: 70px;
-      left: 20px;
-      z-index: 1001;
-      background: white;
+      bottom: 10px;
+      left: 10px;
+      background-color: white;
       padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    }
-
-    .search-box input {
-      width: 120px;
-      padding: 5px;
-    }
-
-    .search-box button {
-      padding: 5px 10px;
-    }
-
-    .leaflet-control-zoom {
-      top: 140px !important;
-      left: 20px !important;
-    }
-
-    .leaflet-control-layers {
-      margin-top: 100px !important;
-    }
-
-    #stats-box {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      background: white;
-      padding: 12px 18px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
       font-size: 14px;
       color: #333;
-      z-index: 1003;
-      min-width: 220px;
-      line-height: 1.5;
-    }
-
-    #stats-box b {
-      color: #0057b8;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <img src="https://raw.githubusercontent.com/authorizedandunauthorized0/authorizedandunauthorized0.github.io/main/university-logo.png" alt="شعار الجامعة" />
-    <h1>Authorized And UnAuthorized Building Map</h1>
-  </div>
-
-  <div class="search-box">
-    <input type="text" id="search-input" placeholder="ParcelNumber" />
-    <button onclick="searchByParcelNumber()">بحث</button>
-  </div>
-
   <div id="map"></div>
 
-  <!-- صندوق الإحصائيات -->
-  <div id="stats-box">
-    <div>عدد المباني الكلي: <b id="total-buildings">0</b></div>
-    <div>عدد المباني المرخصة: <b id="authorized-buildings">0</b></div>
-    <div>عدد المباني غير المرخصة: <b id="unauthorized-buildings">0</b></div>
-    <div>النسبة المئوية للمرخصة: <b id="percent-authorized">0%</b></div>
-    <div>النسبة المئوية لغير المرخصة: <b id="percent-unauthorized">0%</b></div>
+  <!-- البوكس الخاص بنسبة وعدد المباني -->
+  <div class="info-box" id="buildingInfo">
+    جاري التحميل...
   </div>
 
   <!-- الليجند -->
   <div class="legend">
-    <i style="background: red"></i> المباني<br>
+    <i style="background: green"></i> مبانٍ مرخصة<br>
+    <i style="background: red"></i> مبانٍ غير مرخصة<br>
     <i style="background: orange"></i> الكتل<br>
-    <i style="background: green"></i> المخطط الهيكلي<br>
+    <i style="background: lightgreen"></i> المخطط الهيكلي<br>
     <i style="background: gray"></i> الطرق الداخلية<br>
     <i style="background: black"></i> الطرق الخارجية
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script>
-    var map = L.map('map').setView([32.0478311, 35.1635749], 14);
+    var map = L.map('map').setView([31.9, 35.2], 13);
 
+    // إضافة طبقة الخريطة الأساسية
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    const styles = {
-      'Mazare_Alnoubani.json': { color: 'blue', weight: 2, fillOpacity: 0 },
-      'Urban_Master_Plan.json': { color: 'green', weight: 2, fillOpacity: 0.3 },
-      'Block_Mazare1.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare2.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare3.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare4.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare5.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare6.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 },
-      'Roads_InSide.json': { color: 'gray', weight: 2 },
-      'Roads_OutSide.json': { color: 'black', weight: 2 }
-    };
+    // تحميل البيانات الجغرافية
 
-    const fileOrder = [
-      'Mazare_Alnoubani.json',
-      'Block_Mazare6.geojson',
-      'Block_Mazare5.geojson',
-      'Block_Mazare4.geojson',
-      'Block_Mazare3.geojson',
-      'Block_Mazare2.json',
-      'Block_Mazare1.json',
-      'Urban_Master_Plan.json',
-      'Roads_OutSide.json',
-      'Roads_InSide.json',
-      'Buildings.geojson'
-    ];
+    // 1. المباني
+    fetch('Buildings.geojson')
+      .then(res => res.json())
+      .then(data => {
+        let licensedCount = 0;
+        let unlicensedCount = 0;
 
-    const overlayLayers = {};
-    let buildingLayer;
-
-    async function loadLayers() {
-      for (const file of fileOrder) {
-        const res = await fetch(file);
-        const data = await res.json();
-
-        if (file === 'Buildings.geojson') {
-          countBuildingsStats(data.features);
-        }
-
-        const layer = L.geoJSON(data, {
-          style: styles[file],
-          onEachFeature: function (feature, layer) {
-            if (file === 'Buildings.geojson') {
-              const props = feature.properties;
-              const distance = props.Distance;
-              const formattedDistance = distance === 0
-                ? '0'
-                : typeof distance === 'number'
-                  ? distance.toFixed(2)
-                  : 'N/A';
-
-              const popupContent = `
-                <b>Status:</b> ${props.Status || 'N/A'}<br>
-                <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
-                <b>Location:</b> ${props.Location || 'N/A'}<br>
-                <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
-                <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
-                <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
-                <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
-                <b>Distance:</b> ${formattedDistance}
-              `;
-              layer.bindPopup(popupContent);
+        // إضافة المباني مع التلوين
+        L.geoJSON(data, {
+          style: function (feature) {
+            if (feature.properties.Status === 'مرخص') {
+              licensedCount++;
+              return { color: 'green' };
+            } else {
+              unlicensedCount++;
+              return { color: 'red' };
             }
+          },
+          onEachFeature: function (feature, layer) {
+            layer.bindPopup('نوع الترخيص: ' + feature.properties.Status);
           }
-        });
+        }).addTo(map);
 
-        const layerName = file.split('.')[0];
-        overlayLayers[layerName] = layer;
-        layer.addTo(map);
+        // عرض المعلومات في البوكس
+        const total = licensedCount + unlicensedCount;
+        const licensedPercent = ((licensedCount / total) * 100).toFixed(2);
+        const unlicensedPercent = ((unlicensedCount / total) * 100).toFixed(2);
 
-        if (file === 'Buildings.geojson') {
-          buildingLayer = layer;
-        }
-      }
-
-      L.control.layers(null, overlayLayers).addTo(map);
-    }
-
-    function countBuildingsStats(features) {
-      let authorizedCount = 0;
-      let unauthorizedCount = 0;
-
-      features.forEach(f => {
-        const status = f.properties.Status;
-        if (status === 'Authorized') authorizedCount++;
-        else if (status === 'Unauthorized') unauthorizedCount++;
+        document.getElementById('buildingInfo').innerHTML = `
+          <strong>إحصائية المباني:</strong><br>
+          المرخصة: ${licensedCount} (${licensedPercent}%)<br>
+          غير المرخصة: ${unlicensedCount} (${unlicensedPercent}%)
+        `;
       });
 
-      const total = authorizedCount + unauthorizedCount;
-      const percentAuthorized = total === 0 ? 0 : ((authorizedCount / total) * 100).toFixed(1);
-      const percentUnauthorized = total === 0 ? 0 : ((unauthorizedCount / total) * 100).toFixed(1);
-
-      document.getElementById('total-buildings').textContent = total;
-      document.getElementById('authorized-buildings').textContent = authorizedCount;
-      document.getElementById('unauthorized-buildings').textContent = unauthorizedCount;
-      document.getElementById('percent-authorized').textContent = percentAuthorized + '%';
-      document.getElementById('percent-unauthorized').textContent = percentUnauthorized + '%';
-    }
-
-    loadLayers();
-
-    function searchByParcelNumber() {
-      const input = document.getElementById("search-input").value.trim();
-      if (!input || !buildingLayer) return;
-
-      let found = false;
-      buildingLayer.eachLayer(layer => {
-        const props = layer.feature.properties;
-        if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
-          found = true;
-          map.fitBounds(layer.getBounds());
-          layer.openPopup();
-        }
+    // 2. الكتل
+    fetch('Blocks.geojson')
+      .then(res => res.json())
+      .then(data => {
+        L.geoJSON(data, {
+          style: { color: 'orange', weight: 1 }
+        }).addTo(map);
       });
-      if (!found) alert("لم يتم العثور على رقم القطعة: " + input);
-    }
+
+    // 3. المخطط الهيكلي
+    fetch('StructurePlan.geojson')
+      .then(res => res.json())
+      .then(data => {
+        L.geoJSON(data, {
+          style: { color: 'lightgreen', weight: 1 }
+        }).addTo(map);
+      });
+
+    // 4. الطرق الداخلية
+    fetch('InternalRoads.geojson')
+      .then(res => res.json())
+      .then(data => {
+        L.geoJSON(data, {
+          style: { color: 'gray', weight: 2 }
+        }).addTo(map);
+      });
+
+    // 5. الطرق الخارجية
+    fetch('ExternalRoads.geojson')
+      .then(res => res.json())
+      .then(data => {
+        L.geoJSON(data, {
+          style: { color: 'black', weight: 2 }
+        }).addTo(map);
+      });
+
   </script>
 </body>
 </html>
