@@ -88,6 +88,25 @@
     .leaflet-control-layers {
       margin-top: 100px !important;
     }
+
+    /* صندوق الإحصائيات الجديد أسفل اليسار */
+    #stats-box {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: white;
+      padding: 12px 18px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      font-size: 14px;
+      color: #333;
+      z-index: 1003;
+      min-width: 220px;
+      line-height: 1.5;
+    }
+    #stats-box b {
+      color: #0057b8;
+    }
   </style>
 </head>
 <body>
@@ -102,6 +121,15 @@
   </div>
 
   <div id="map"></div>
+
+  <!-- صندوق الإحصائيات -->
+  <div id="stats-box">
+    <div>عدد المباني الكلي: <b id="total-buildings">0</b></div>
+    <div>عدد المباني المرخصة: <b id="authorized-buildings">0</b></div>
+    <div>عدد المباني غير المرخصة: <b id="unauthorized-buildings">0</b></div>
+    <div>النسبة المئوية للمرخصة: <b id="percent-authorized">0%</b></div>
+    <div>النسبة المئوية لغير المرخصة: <b id="percent-unauthorized">0%</b></div>
+  </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
@@ -147,6 +175,11 @@
         const res = await fetch(file);
         const data = await res.json();
 
+        // إذا هذا ملف المباني، نعد الإحصائيات
+        if (file === 'Buildings.geojson') {
+          countBuildingsStats(data.features);
+        }
+
         const layer = L.geoJSON(data, {
           style: styles[file],
           onEachFeature: function (feature, layer) {
@@ -170,6 +203,13 @@
                 <b>Distance:</b> ${formattedDistance}
               `;
               layer.bindPopup(popupContent);
+
+              // تلوين المباني حسب الحالة
+              if (props.Status === 'Authorized') {
+                layer.setStyle({ color: 'green', fillColor: 'green', fillOpacity: 0.5 });
+              } else if (props.Status === 'Unauthorized') {
+                layer.setStyle({ color: 'red', fillColor: 'red', fillOpacity: 0.5 });
+              }
             }
           }
         });
@@ -182,6 +222,28 @@
           buildingLayer = layer;
         }
       }
+    }
+
+    function countBuildingsStats(features) {
+      let authorizedCount = 0;
+      let unauthorizedCount = 0;
+
+      features.forEach(f => {
+        const status = f.properties.Status;
+        if (status === 'Authorized') authorizedCount++;
+        else if (status === 'Unauthorized') unauthorizedCount++;
+      });
+
+      const total = authorizedCount + unauthorizedCount;
+      const percentAuthorized = total === 0 ? 0 : ((authorizedCount / total) * 100).toFixed(1);
+      const percentUnauthorized = total === 0 ? 0 : ((unauthorizedCount / total) * 100).toFixed(1);
+
+      // تحديث النص في صندوق الإحصائيات
+      document.getElementById('total-buildings').textContent = total;
+      document.getElementById('authorized-buildings').textContent = authorizedCount;
+      document.getElementById('unauthorized-buildings').textContent = unauthorizedCount;
+      document.getElementById('percent-authorized').textContent = percentAuthorized + '%';
+      document.getElementById('percent-unauthorized').textContent = percentUnauthorized + '%';
     }
 
     loadLayers();
