@@ -8,66 +8,31 @@
   <style>
     body { margin: 0; font-family: Arial, sans-serif; }
     #map { height: 100vh; }
-
     .top-bar {
-      position: absolute; top: 0; left: 0; width: 100%;
-      height: 60px; background-color: #0057b8;
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1002;
+      position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+      background-color: #0057b8; display: flex; align-items: center;
+      justify-content: center; z-index: 1002;
     }
-
     .top-bar img {
-      height: 40px; margin-left: 20px;
-      position: absolute; left: 10px;
+      height: 40px; margin-left: 20px; position: absolute; left: 10px;
     }
-
-    .top-bar h1 {
-      color: white; font-size: 20px;
-      margin: 0; text-align: center;
-    }
-
+    .top-bar h1 { color: white; font-size: 20px; margin: 0; text-align: center; }
     .legend {
-      background: white;
-      padding: 10px;
-      line-height: 1.5;
-      color: #333;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      background: white; padding: 10px; line-height: 1.5;
+      color: #333; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
-
     .legend i {
-      display: inline-block;
-      width: 18px;
-      height: 18px;
-      margin-right: 8px;
-      vertical-align: middle;
-      opacity: 0.7;
+      display: inline-block; width: 18px; height: 18px;
+      margin-right: 8px; vertical-align: middle; opacity: 0.7;
     }
-
     .search-box {
-      position: absolute;
-      top: 70px;
-      left: 20px;
-      z-index: 1001;
-      background: white;
-      padding: 10px;
-      border-radius: 5px;
+      position: absolute; top: 70px; left: 20px; z-index: 1001;
+      background: white; padding: 10px; border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
-
-    .search-box input {
-      width: 120px;
-      padding: 5px;
-    }
-
-    .search-box button {
-      padding: 5px 10px;
-    }
-
-    .leaflet-control-zoom {
-      top: 140px !important;
-      left: 20px !important;
-    }
+    .search-box input { width: 120px; padding: 5px; }
+    .search-box button { padding: 5px 10px; }
+    .leaflet-control-zoom { top: 140px !important; left: 20px !important; }
   </style>
 </head>
 <body>
@@ -92,7 +57,9 @@
     }).addTo(map);
 
     const styles = {
-      'Mazare_Alnoubani.json': { color: 'blue', weight: 2, fillOpacity: 0 },
+      'Buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 },
+      'Roads_InSide.json': { color: 'gray', weight: 2 },
+      'Roads_OutSide.json': { color: 'black', weight: 2 },
       'Urban_Master_Plan.json': { color: 'green', weight: 2, fillOpacity: 0.3 },
       'Block_Mazare1.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
       'Block_Mazare2.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
@@ -100,95 +67,68 @@
       'Block_Mazare4.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
       'Block_Mazare5.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
       'Block_Mazare6.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 },
-      'Roads_InSide.json': { color: 'gray', weight: 2 },
-      'Roads_OutSide.json': { color: 'black', weight: 2 }
+      'Mazare_Alnoubani.json': { color: 'blue', weight: 2, fillOpacity: 0 }
     };
+
+    const fileOrder = [
+      'Buildings.geojson',
+      'Roads_InSide.json',
+      'Roads_OutSide.json',
+      'Urban_Master_Plan.json',
+      'Block_Mazare1.json',
+      'Block_Mazare2.json',
+      'Block_Mazare3.geojson',
+      'Block_Mazare4.geojson',
+      'Block_Mazare5.geojson',
+      'Block_Mazare6.geojson',
+      'Mazare_Alnoubani.json'
+    ];
 
     const overlayLayers = {};
     let buildingLayer;
-    let buildingsData = null;
-    let mazareLayer;
 
-    const loadGeoJSON = async (file) => {
-      const res = await fetch(file);
-      return await res.json();
-    };
+    fileOrder.forEach(file => {
+      fetch(file)
+        .then(res => res.json())
+        .then(data => {
+          const layer = L.geoJSON(data, {
+            style: styles[file],
+            onEachFeature: function (feature, layer) {
+              if (file === 'Buildings.geojson') {
+                const props = feature.properties;
+                const distance = props.Distance;
+                const formattedDistance = distance === 0
+                  ? '0'
+                  : typeof distance === 'number'
+                    ? distance.toFixed(2)
+                    : 'N/A';
 
-    const processAllLayers = async () => {
-      const allPromises = Object.keys(styles).map(async file => {
-        const data = await loadGeoJSON(file);
-        const layer = L.geoJSON(data, {
-          style: styles[file],
-          onEachFeature: function (feature, layer) {
-            if (file === 'Buildings.geojson') {
-              const props = feature.properties;
-              const distance = props.Distance;
-              const formattedDistance = distance === 0
-                ? '0'
-                : typeof distance === 'number'
-                  ? distance.toFixed(2)
-                  : 'N/A';
-
-              const popupContent = `
-                <b>Status:</b> ${props.Status || 'N/A'}<br>
-                <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
-                <b>Location:</b> ${props.Location || 'N/A'}<br>
-                <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
-                <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
-                <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
-                <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
-                <b>Distance:</b> ${formattedDistance}
-              `;
-              layer.bindPopup(popupContent);
+                const popupContent = `
+                  <b>Status:</b> ${props.Status || 'N/A'}<br>
+                  <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
+                  <b>Location:</b> ${props.Location || 'N/A'}<br>
+                  <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
+                  <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
+                  <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
+                  <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
+                  <b>Distance:</b> ${formattedDistance}
+                `;
+                layer.bindPopup(popupContent);
+              }
             }
+          });
+
+          overlayLayers[file.split('.')[0]] = layer;
+
+          if (file === 'Buildings.geojson') {
+            buildingLayer = layer;
+            layer.addTo(map);
+            layer.bringToFront();
+          } else {
+            layer.addTo(map);
           }
         });
-
-        const layerName = file.split('.')[0];
-        overlayLayers[layerName] = layer;
-
-        if (file === 'Buildings.geojson') {
-          buildingLayer = layer;
-          buildingsData = data;
-          layer.addTo(map);
-          layer.bringToFront();
-        } else if (file === 'Mazare_Alnoubani.json') {
-          mazareLayer = layer;
-          layer.addTo(map);
-        } else {
-          layer.addTo(map);
-        }
-      });
-
-      await Promise.all(allPromises);
-
-      highlightZonesWithoutBuildings();
-    };
-
-    function highlightZonesWithoutBuildings() {
-      if (!mazareLayer || !buildingsData) return;
-
-      const buildingPoints = buildingsData.features.map(f => turf.point(f.geometry.coordinates));
-      const buildingsFC = turf.featureCollection(buildingPoints);
-
-      mazareLayer.eachLayer(function (zoneLayer) {
-        const zonePolygon = zoneLayer.feature;
-
-        const buildingsInZone = turf.pointsWithinPolygon(buildingsFC, zonePolygon);
-        if (buildingsInZone.features.length === 0) {
-          const emptyZoneLayer = L.geoJSON(zonePolygon, {
-            style: {
-              color: 'purple',
-              weight: 2,
-              fillOpacity: 0.5
-            }
-          }).addTo(map).bringToFront();
-
-          emptyZoneLayer.bindPopup("منطقة بدون مباني مرخصة أو غير مرخصة");
-        }
-      });
-    }
+    });
 
     function searchByParcelNumber() {
       const input = document.getElementById("search-input").value.trim();
@@ -215,24 +155,16 @@
     legend.onAdd = function (map) {
       const div = L.DomUtil.create('div', 'legend');
       div.innerHTML += "<b>Legend</b><br>";
-      div.innerHTML += '<i style="background: blue"></i> Mazare Alnoubani<br>';
-      div.innerHTML += '<i style="background: green"></i> Urban Master Plan<br>';
-      div.innerHTML += '<i style="background: orange"></i> Block Mazare (1–6)<br>';
       div.innerHTML += '<i style="background: red"></i> Buildings<br>';
       div.innerHTML += '<i style="background: gray"></i> Roads Inside<br>';
       div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
-      div.innerHTML += '<i style="background: purple"></i> Zones without buildings<br>';
+      div.innerHTML += '<i style="background: green"></i> Urban Master Plan<br>';
+      div.innerHTML += '<i style="background: orange"></i> Block Mazare (1–6)<br>';
+      div.innerHTML += '<i style="background: blue"></i> Mazare Alnoubani<br>';
       return div;
     };
 
     legend.addTo(map);
-
-    loadGeoJSON('https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js').then(() => {
-      const script = document.createElement('script');
-      script.src = "https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js";
-      script.onload = () => processAllLayers();
-      document.head.appendChild(script);
-    });
 
     setTimeout(() => {
       L.control.layers(null, overlayLayers, { collapsed: false }).addTo(map);
