@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
   <meta charset="utf-8" />
   <title>خريطة توزيع المباني</title>
@@ -18,7 +18,7 @@
       background-color: white;
       padding: 10px;
       font-size: 14px;
-      line-height: 18px;
+      line-height: 20px;
       color: #333;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
@@ -42,76 +42,72 @@
       color: #333;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      line-height: 20px;
     }
   </style>
 </head>
 <body>
   <div id="map"></div>
 
-  <!-- البوكس الخاص بنسبة وعدد المباني -->
-  <div class="info-box" id="buildingInfo">
-    جاري التحميل...
-  </div>
+  <!-- صندوق الإحصائيات -->
+  <div class="info-box" id="buildingInfo">جاري التحميل...</div>
 
-  <!-- الليجند -->
+  <!-- وسيلة الإيضاح -->
   <div class="legend">
-    <i style="background: green"></i> مبانٍ مرخصة<br>
-    <i style="background: red"></i> مبانٍ غير مرخصة<br>
-    <i style="background: orange"></i> الكتل<br>
-    <i style="background: lightgreen"></i> المخطط الهيكلي<br>
-    <i style="background: gray"></i> الطرق الداخلية<br>
-    <i style="background: black"></i> الطرق الخارجية
+    <i style="background: green;"></i> مبانٍ مرخصة<br>
+    <i style="background: red;"></i> مبانٍ غير مرخصة<br>
+    <i style="background: orange;"></i> الكتل<br>
+    <i style="background: lightgreen;"></i> المخطط الهيكلي<br>
+    <i style="background: gray;"></i> الطرق الداخلية<br>
+    <i style="background: black;"></i> الطرق الخارجية
   </div>
 
+  <!-- Leaflet -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script>
     var map = L.map('map').setView([31.9, 35.2], 13);
 
-    // إضافة طبقة الخريطة الأساسية
+    // خريطة الأساس
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // تحميل البيانات الجغرافية
-
     // 1. المباني
     fetch('Buildings.geojson')
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data => {
-        let licensedCount = 0;
-        let unlicensedCount = 0;
+        let licensed = 0;
+        let unlicensed = 0;
 
-        // إضافة المباني مع التلوين
-        L.geoJSON(data, {
+        const buildingsLayer = L.geoJSON(data, {
           style: function (feature) {
             if (feature.properties.Status === 'مرخص') {
-              licensedCount++;
+              licensed++;
               return { color: 'green' };
             } else {
-              unlicensedCount++;
+              unlicensed++;
               return { color: 'red' };
             }
           },
           onEachFeature: function (feature, layer) {
-            layer.bindPopup('نوع الترخيص: ' + feature.properties.Status);
+            layer.bindPopup("نوع الترخيص: " + feature.properties.Status);
           }
         }).addTo(map);
 
-        // عرض المعلومات في البوكس
-        const total = licensedCount + unlicensedCount;
-        const licensedPercent = ((licensedCount / total) * 100).toFixed(2);
-        const unlicensedPercent = ((unlicensedCount / total) * 100).toFixed(2);
+        const total = licensed + unlicensed;
+        const percentLicensed = ((licensed / total) * 100).toFixed(1);
+        const percentUnlicensed = ((unlicensed / total) * 100).toFixed(1);
 
         document.getElementById('buildingInfo').innerHTML = `
-          <strong>إحصائية المباني:</strong><br>
-          المرخصة: ${licensedCount} (${licensedPercent}%)<br>
-          غير المرخصة: ${unlicensedCount} (${unlicensedPercent}%)
+          <b>إحصائية المباني:</b><br>
+          مرخصة: ${licensed} (${percentLicensed}%)<br>
+          غير مرخصة: ${unlicensed} (${percentUnlicensed}%)
         `;
       });
 
     // 2. الكتل
     fetch('Blocks.geojson')
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data => {
         L.geoJSON(data, {
           style: { color: 'orange', weight: 1 }
@@ -120,7 +116,7 @@
 
     // 3. المخطط الهيكلي
     fetch('StructurePlan.geojson')
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data => {
         L.geoJSON(data, {
           style: { color: 'lightgreen', weight: 1 }
@@ -129,7 +125,7 @@
 
     // 4. الطرق الداخلية
     fetch('InternalRoads.geojson')
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data => {
         L.geoJSON(data, {
           style: { color: 'gray', weight: 2 }
@@ -138,13 +134,13 @@
 
     // 5. الطرق الخارجية
     fetch('ExternalRoads.geojson')
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data => {
         L.geoJSON(data, {
           style: { color: 'black', weight: 2 }
         }).addTo(map);
       });
-
   </script>
 </body>
 </html>
+
