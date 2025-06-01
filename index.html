@@ -84,6 +84,10 @@
       top: 140px !important;
       left: 20px !important;
     }
+
+    .leaflet-control-layers {
+      margin-top: 100px !important;
+    }
   </style>
 </head>
 <body>
@@ -107,6 +111,20 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    const filesOrder = [
+      'Mazare_Alnoubani.json',
+      'Urban_Master_Plan.json',
+      'Block_Mazare1.json',
+      'Block_Mazare2.json',
+      'Block_Mazare3.geojson',
+      'Block_Mazare4.geojson',
+      'Block_Mazare5.geojson',
+      'Block_Mazare6.geojson',
+      'Roads_OutSide.json',
+      'Roads_InSide.json',
+      'Buildings.geojson'
+    ];
+
     const styles = {
       'Mazare_Alnoubani.json': { color: 'blue', weight: 2, fillOpacity: 0 },
       'Urban_Master_Plan.json': { color: 'green', weight: 2, fillOpacity: 0.3 },
@@ -116,71 +134,56 @@
       'Block_Mazare4.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
       'Block_Mazare5.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
       'Block_Mazare6.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
-      'Buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 },
       'Roads_InSide.json': { color: 'gray', weight: 2 },
-      'Roads_OutSide.json': { color: 'black', weight: 2 }
+      'Roads_OutSide.json': { color: 'black', weight: 2 },
+      'Buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 }
     };
-
-    const fileOrder = [
-      'Mazare_Alnoubani.json',
-      'Block_Mazare6.geojson',
-      'Block_Mazare5.geojson',
-      'Block_Mazare4.geojson',
-      'Block_Mazare3.geojson',
-      'Block_Mazare2.json',
-      'Block_Mazare1.json',
-      'Urban_Master_Plan.json',
-      'Roads_OutSide.json',
-      'Roads_InSide.json',
-      'Buildings.geojson'
-    ];
 
     const overlayLayers = {};
     let buildingLayer;
 
-    async function loadLayers() {
-      for (const file of fileOrder) {
-        const res = await fetch(file);
-        const data = await res.json();
+    filesOrder.forEach(file => {
+      fetch(file)
+        .then(res => res.json())
+        .then(data => {
+          const layer = L.geoJSON(data, {
+            style: styles[file],
+            onEachFeature: function (feature, layer) {
+              if (file === 'Buildings.geojson') {
+                const props = feature.properties;
+                const distance = props.Distance;
+                const formattedDistance = distance === 0
+                  ? '0'
+                  : typeof distance === 'number'
+                    ? distance.toFixed(2)
+                    : 'N/A';
 
-        const layer = L.geoJSON(data, {
-          style: styles[file],
-          onEachFeature: function (feature, layer) {
-            if (file === 'Buildings.geojson') {
-              const props = feature.properties;
-              const distance = props.Distance;
-              const formattedDistance = distance === 0
-                ? '0'
-                : typeof distance === 'number'
-                  ? distance.toFixed(2)
-                  : 'N/A';
-
-              const popupContent = `
-                <b>Status:</b> ${props.Status || 'N/A'}<br>
-                <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
-                <b>Location:</b> ${props.Location || 'N/A'}<br>
-                <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
-                <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
-                <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
-                <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
-                <b>Distance:</b> ${formattedDistance}
-              `;
-              layer.bindPopup(popupContent);
+                const popupContent = `
+                  <b>Status:</b> ${props.Status || 'N/A'}<br>
+                  <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
+                  <b>Location:</b> ${props.Location || 'N/A'}<br>
+                  <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
+                  <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
+                  <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
+                  <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
+                  <b>Distance:</b> ${formattedDistance}
+                `;
+                layer.bindPopup(popupContent);
+              }
             }
+          });
+
+          const layerName = file.split('.')[0];
+          overlayLayers[layerName] = layer;
+          layer.addTo(map);
+
+          // اجعل المباني في الأعلى
+          if (file === 'Buildings.geojson') {
+            buildingLayer = layer;
+            layer.bringToFront();
           }
         });
-
-        const layerName = file.split('.')[0];
-        overlayLayers[layerName] = layer;
-        layer.addTo(map);
-
-        if (file === 'Buildings.geojson') {
-          buildingLayer = layer;
-        }
-      }
-    }
-
-    loadLayers();
+    });
 
     function searchByParcelNumber() {
       const input = document.getElementById("search-input").value.trim();
