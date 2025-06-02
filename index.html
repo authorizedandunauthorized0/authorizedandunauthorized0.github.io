@@ -14,7 +14,6 @@
 
     #map {
       height: 100vh;
-      z-index: 1;
     }
 
     .top-bar {
@@ -45,17 +44,12 @@
     }
 
     .legend {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
       background: white;
       padding: 10px;
       line-height: 1.5;
       color: #333;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      z-index: 1003;
-      font-size: 14px;
     }
 
     .legend i {
@@ -90,24 +84,20 @@
     .leaflet-control-zoom {
       top: 140px !important;
       left: 20px !important;
-      z-index: 1004 !important;
     }
 
     .leaflet-control-layers {
-      position: absolute !important;
-      top: 120px !important;
-      left: 20px !important;
-      z-index: 1005 !important;
+      margin-top: 60px !important; /* لضبطها أسفل شريط العنوان */
+      z-index: 1003 !important;    /* أعلى من شريط العنوان (1002) */
       box-shadow: 0 1px 5px rgba(0,0,0,0.65);
       border-radius: 5px;
-      background: white;
     }
 
     .chart-box {
       position: absolute;
       bottom: 20px;
       left: 20px;
-      z-index: 1003;
+      z-index: 1001;
       background: white;
       padding: 10px;
       border-radius: 5px;
@@ -145,38 +135,26 @@
 
   <div id="map"></div>
 
-  <div class="legend" id="legend">
-    <h4>مفتاح الخريطة</h4>
-    <i style="background: rgb(0, 0, 0); opacity: 0.7;"></i> Mazare_Alnoubani<br>
-    <i style="background: rgb(189, 214, 175); opacity: 0.7;"></i> Urban_Master_Plan<br>
-    <i style="background: rgb(143, 188, 112); opacity: 0.7;"></i> Block_Mazare (1-6)<br>
-    <i style="background: rgb(168, 168, 168); opacity: 0.6;"></i> Buildings<br>
-    <i style="background: rgb(158, 170, 155); opacity: 1;"></i> Roads_InSide<br>
-    <i style="background: rgb(82, 93, 79); opacity: 1;"></i> Roads_OutSide<br>
-  </div>
-
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     var map = L.map('map').setView([32.0478311, 35.1635749], 14);
 
-    // إضافة طبقة أساس OSM
-    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
     const styles = {
-      'Mazare_Alnoubani.json': { color: 'rgb(0, 0, 0)', weight: 2, fillOpacity: 0 },
-      'Urban_Master_Plan.json': { color: 'rgb(189, 214, 175)', weight: 2, fillOpacity: 0.3 },
-      'Block_Mazare1.json': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare2.json': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare3.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare4.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare5.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare6.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
-      'Buildings.geojson': { color: 'rgb(168, 168, 168)', weight: 2, fillOpacity: 0.6, fillColor: 'rgb(225, 225, 225)' },
-      'Roads_InSide.json': { color: 'rgb(158, 170, 155)', weight: 2 },
-      'Roads_OutSide.json': { color: 'rgb(82, 93, 79)', weight: 2 }
+      'Mazare_Alnoubani.json': { color: 'black', weight: 2, fillOpacity: 0 },
+      'Urban_Master_Plan.json': { color: 'gray', weight: 2, fillOpacity: 0.3 },
+      'Block_Mazare1.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare2.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare3.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare4.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare5.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare6.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Buildings.geojson': { color: 'brown', weight: 2, fillOpacity: 0.6 },
+      'Roads_InSide.json': { color: 'black', weight: 2 },
+      'Roads_OutSide.json': { color: 'black', weight: 2 }
     };
 
     const fileOrder = [
@@ -202,23 +180,8 @@
         const res = await fetch(file);
         const data = await res.json();
 
-        const styleOptions = styles[file] || { color: 'black', weight: 1 };
-
-        const styleFunc = function(feature) {
-          if (file === 'Buildings.geojson') {
-            return {
-              color: 'rgb(168, 168, 168)',  // لون الحدود
-              weight: 2,
-              fillColor: 'rgb(225, 225, 225)', // لون التعبئة من الداخل
-              fillOpacity: 0.6
-            };
-          } else {
-            return styleOptions;
-          }
-        };
-
         const layer = L.geoJSON(data, {
-          style: styleFunc,
+          style: styles[file],
           onEachFeature: function (feature, layer) {
             if (file === 'Buildings.geojson') {
               const props = feature.properties;
@@ -247,76 +210,55 @@
           }
         });
 
-        overlayLayers[file] = layer;
+        const layerName = file.split('.')[0];
+        overlayLayers[layerName] = layer;
+        layer.addTo(map);
 
         if (file === 'Buildings.geojson') {
           buildingLayer = layer;
-          buildingLayer.addTo(map);
-          updateStatsAndChart();
-        } else {
-          layer.addTo(map);
+          setTimeout(() => {
+            displayStats();
+          }, 500);
         }
       }
-
-      addLayerControl();
     }
 
-    function addLayerControl() {
-      const baseMaps = {
-        "OpenStreetMap": osmLayer
-      };
-
-      const overlays = {
-        "Mazare_Alnoubani": overlayLayers['Mazare_Alnoubani.json'],
-        "Urban_Master_Plan": overlayLayers['Urban_Master_Plan.json'],
-        "Block_Mazare1": overlayLayers['Block_Mazare1.json'],
-        "Block_Mazare2": overlayLayers['Block_Mazare2.json'],
-        "Block_Mazare3": overlayLayers['Block_Mazare3.geojson'],
-        "Block_Mazare4": overlayLayers['Block_Mazare4.geojson'],
-        "Block_Mazare5": overlayLayers['Block_Mazare5.geojson'],
-        "Block_Mazare6": overlayLayers['Block_Mazare6.geojson'],
-        "Buildings": overlayLayers['Buildings.geojson'],
-        "Roads_InSide": overlayLayers['Roads_InSide.json'],
-        "Roads_OutSide": overlayLayers['Roads_OutSide.json']
-      };
-
-      L.control.layers(baseMaps, overlays, {collapsed: false}).addTo(map);
-    }
-
-    function updateStatsAndChart() {
+    function displayStats() {
       const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
-      document.getElementById('total-count').textContent = total;
+      document.getElementById("total-count").textContent = total;
 
       const ctx = document.getElementById('statusChart').getContext('2d');
-      const statuses = Object.keys(statusCounts);
-      const counts = Object.values(statusCounts);
-
       new Chart(ctx, {
-        type: 'bar',
+        type: 'pie',
         data: {
-          labels: statuses,
+          labels: Object.keys(statusCounts),
           datasets: [{
-            label: 'عدد المباني حسب الحالة',
-            data: counts,
-            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+            data: Object.values(statusCounts),
+            backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#6c757d']
           }]
         },
         options: {
           responsive: true,
           plugins: {
             legend: {
-              display: false
+              position: 'bottom',
+              labels: {
+                font: {
+                  size: 12
+                }
+              }
             },
             title: {
               display: true,
-              text: 'عدد المباني حسب الحالة'
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1
+              text: 'نسبة حالة المباني'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw;
+                  const percentage = ((value / total) * 100).toFixed(2);
+                  return `${context.label}: ${value} (${percentage}%)`;
+                }
               }
             }
           }
@@ -325,28 +267,46 @@
     }
 
     function searchByParcelNumber() {
-      const input = document.getElementById('search-input').value.trim();
-      if (!input) {
-        alert('يرجى إدخال رقم القطعة ParcelNumber');
-        return;
-      }
+      const input = document.getElementById("search-input").value.trim();
+      if (!input || !buildingLayer) return;
 
       let found = false;
-      buildingLayer.eachLayer(layer => {
-        if (layer.feature && layer.feature.properties.ParcelNumber == input) {
-          map.fitBounds(layer.getBounds());
+
+      buildingLayer.eachLayer(function (layer) {
+        const props = layer.feature.properties;
+        if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
+          map.setView(layer.getBounds().getCenter(), 17);
           layer.openPopup();
           found = true;
         }
       });
 
       if (!found) {
-        alert('لم يتم العثور على المبنى برقم القطعة المدخل');
+        alert("لم يتم العثور على ParcelNumber.");
       }
     }
+
+    const legend = L.control({ position: 'bottomright' });
+
+    legend.onAdd = function (map) {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += "<b>Legend</b><br>";
+      div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
+      div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
+      div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
+      div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
+      return div;
+    };
+
+    legend.addTo(map);
+
+    setTimeout(() => {
+      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
+    }, 1000);
 
     loadLayers();
   </script>
 </body>
 </html>
-
