@@ -144,17 +144,17 @@
     }).addTo(map);
 
     const styles = {
-      'Mazare_Alnoubani.json': { color: 'black', weight: 2, fillOpacity: 0 },
-      'Urban_Master_Plan.json': { color: 'gray', weight: 2, fillOpacity: 0.3 },
-      'Block_Mazare1.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare2.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare3.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare4.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare5.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare6.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Buildings.geojson': { color: 'brown', weight: 2, fillOpacity: 0.6 },
-      'Roads_InSide.json': { color: 'black', weight: 2 },
-      'Roads_OutSide.json': { color: 'black', weight: 2 }
+      'Mazare_Alnoubani.json': { color: 'rgb(0, 0, 0)', weight: 2, fillOpacity: 0 },
+      'Urban_Master_Plan.json': { color: 'rgb(189, 214, 175)', weight: 2, fillOpacity: 0.3 },
+      'Block_Mazare1.json': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare2.json': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare3.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare4.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare5.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare6.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Buildings.geojson': { color: 'rgb(168, 168, 168)', weight: 2, fillOpacity: 0.6, fillColor: 'rgb(225, 225, 225)' },
+      'Roads_InSide.json': { color: 'rgb(158, 170, 155)', weight: 2 },
+      'Roads_OutSide.json': { color: 'rgb(82, 93, 79)', weight: 2 }
     };
 
     const fileOrder = [
@@ -180,8 +180,25 @@
         const res = await fetch(file);
         const data = await res.json();
 
+        // خصائص النمط حسب الطبقة
+        const styleOptions = styles[file] || { color: 'black', weight: 1 };
+
+        // تعديل خاص للطبقة Buildings لتطبيق لون تعبئة داخلي مختلف عن الحدود
+        const styleFunc = function(feature) {
+          if (file === 'Buildings.geojson') {
+            return {
+              color: 'rgb(168, 168, 168)',  // لون الحدود
+              weight: 2,
+              fillColor: 'rgb(225, 225, 225)', // لون التعبئة من الداخل
+              fillOpacity: 0.6
+            };
+          } else {
+            return styleOptions;
+          }
+        };
+
         const layer = L.geoJSON(data, {
-          style: styles[file],
+          style: styleFunc,
           onEachFeature: function (feature, layer) {
             if (file === 'Buildings.geojson') {
               const props = feature.properties;
@@ -225,7 +242,7 @@
 
     function displayStats() {
       const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
-      document.getElementById("total-count").textContent = total;
+      document.getElementById('total-count').textContent = total;
 
       const ctx = document.getElementById('statusChart').getContext('2d');
       new Chart(ctx, {
@@ -234,7 +251,7 @@
           labels: Object.keys(statusCounts),
           datasets: [{
             data: Object.values(statusCounts),
-            backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#6c757d']
+            backgroundColor: ['#4CAF50', '#FFC107', '#F44336', '#2196F3', '#9E9E9E'],
           }]
         },
         options: {
@@ -243,22 +260,7 @@
             legend: {
               position: 'bottom',
               labels: {
-                font: {
-                  size: 12
-                }
-              }
-            },
-            title: {
-              display: true,
-              text: 'نسبة حالة المباني'
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const value = context.raw;
-                  const percentage = ((value / total) * 100).toFixed(2);
-                  return `${context.label}: ${value} (${percentage}%)`;
-                }
+                font: { size: 14 }
               }
             }
           }
@@ -267,46 +269,43 @@
     }
 
     function searchByParcelNumber() {
-      const input = document.getElementById("search-input").value.trim();
-      if (!input || !buildingLayer) return;
-
+      const input = document.getElementById('search-input').value.trim();
+      if (!input) {
+        alert('يرجى إدخال رقم القطعة للبحث');
+        return;
+      }
       let found = false;
-
-      buildingLayer.eachLayer(function (layer) {
+      buildingLayer.eachLayer(layer => {
         const props = layer.feature.properties;
         if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
-          map.setView(layer.getBounds().getCenter(), 17);
+          map.fitBounds(layer.getBounds(), { maxZoom: 18 });
           layer.openPopup();
           found = true;
         }
       });
-
       if (!found) {
-        alert("لم يتم العثور على ParcelNumber.");
+        alert('رقم القطعة غير موجود');
       }
     }
 
+    // إضافة وسيلة الإيضاح (Legend)
     const legend = L.control({ position: 'bottomright' });
 
-    legend.onAdd = function (map) {
+    legend.onAdd = function () {
       const div = L.DomUtil.create('div', 'legend');
-      div.innerHTML += "<b>Legend</b><br>";
-      div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
-      div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
-      div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
-      div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
+      div.innerHTML += '<i style="background: rgb(225, 225, 225); border: 2px solid rgb(168, 168, 168);"></i> المباني (تعبئة داخلية وحدود خارجية)<br>';
+      div.innerHTML += '<i style="background: rgb(158, 170, 155);"></i> الشوارع الداخلية<br>';
+      div.innerHTML += '<i style="background: rgb(82, 93, 79);"></i> الشوارع الخارجية<br>';
+      div.innerHTML += '<i style="background: rgb(0, 0, 0);"></i> مزارع النوباني<br>';
+      div.innerHTML += '<i style="background: rgb(189, 214, 175);"></i> Urban Master Plan<br>';
+      div.innerHTML += '<i style="background: rgb(143, 188, 112);"></i> الأحواض من 1 إلى 6<br>';
       return div;
     };
 
     legend.addTo(map);
 
-    setTimeout(() => {
-      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
-    }, 1000);
-
     loadLayers();
+
   </script>
 </body>
 </html>
