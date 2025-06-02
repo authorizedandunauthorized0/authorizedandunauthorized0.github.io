@@ -87,8 +87,8 @@
     }
 
     .leaflet-control-layers {
-      margin-top: 60px !important;
-      z-index: 1003 !important;
+      margin-top: 60px !important; /* لضبطها أسفل شريط العنوان */
+      z-index: 1003 !important;    /* أعلى من شريط العنوان (1002) */
       box-shadow: 0 1px 5px rgba(0,0,0,0.65);
       border-radius: 5px;
     }
@@ -122,32 +122,3 @@
     <img src="https://raw.githubusercontent.com/authorizedandunauthorized0/authorizedandunauthorized0.github.io/main/university-logo.png" alt="شعار الجامعة" />
     <h1>Authorized And UnAuthorized Building Map</h1>
   </div>
-
-  <div id="map"></div>
-
-  <!-- مكتبة Leaflet -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <script>
-    // إعداد الخريطة بموقع وزوم مبدئي
-    const map = L.map('map').setView([31.9, 35.2], 13);
-
-    // تحميل طبقة GeoJSON للمباني
-    fetch('buildings.geojson')
-      .then(response => response.json())
-      .then(data => {
-        const buildingsLayer = L.geoJSON(data, {
-          onEachFeature: function (feature, layer) {
-            // التحقق من ParcelNumber = 56
-            if (feature.properties.ParcelNumber === 56) {
-              const center = layer.getBounds().getCenter();
-              map.panTo(center);  // تحريك الخريطة إلى المبنى
-              layer.setStyle({ color: 'red', weight: 3 });  // تمييز المبنى
-              layer.bindPopup("مبنى ParcelNumber = 56").openPopup(); // نافذة منبثقة
-            }
-          }
-        }).addTo(map);
-      });
-  </script>
-</body>
-</html>
