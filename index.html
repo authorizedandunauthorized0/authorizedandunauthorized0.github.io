@@ -7,116 +7,55 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    #map {
-      height: 100vh;
-    }
-
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #map { height: 100vh; }
     .top-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 60px;
-      background-color: #0057b8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1002;
+      position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+      background-color: #0057b8; display: flex; align-items: center;
+      justify-content: center; z-index: 1002;
     }
-
     .top-bar img {
-      height: 40px;
-      margin-left: 20px;
-      position: absolute;
-      left: 10px;
+      height: 40px; margin-left: 20px; position: absolute; left: 10px;
     }
-
-    .top-bar h1 {
-      color: white;
-      font-size: 20px;
-      margin: 0;
-      text-align: center;
-    }
-
+    .top-bar h1 { color: white; font-size: 20px; margin: 0; text-align: center; }
     .legend {
-      background: white;
-      padding: 10px;
-      line-height: 1.5;
-      color: #333;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      background: white; padding: 10px; line-height: 1.5; color: #333;
+      border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
-
     .legend i {
-      display: inline-block;
-      width: 18px;
-      height: 18px;
-      margin-right: 8px;
-      vertical-align: middle;
-      opacity: 0.7;
+      display: inline-block; width: 18px; height: 18px;
+      margin-right: 8px; vertical-align: middle; opacity: 0.7;
     }
-
     .search-box {
-      position: absolute;
-      top: 70px;
-      left: 20px;
-      z-index: 1001;
-      background: white;
-      padding: 10px;
-      border-radius: 5px;
+      position: absolute; top: 70px; left: 20px; z-index: 1001;
+      background: white; padding: 10px; border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
-
     .search-box input {
-      width: 120px;
-      padding: 5px;
-      margin-bottom: 5px;
-      display: block;
+      width: 120px; padding: 5px; margin: 3px 0;
     }
-
     .search-box button {
-      padding: 5px 10px;
-      width: 100%;
+      padding: 5px 10px; margin-top: 5px;
     }
-
     .leaflet-control-zoom {
-      top: 140px !important;
-      left: 20px !important;
+      top: 180px !important; left: 20px !important;
     }
-
     .leaflet-control-layers {
       margin-top: 60px !important;
       z-index: 1003 !important;
       box-shadow: 0 1px 5px rgba(0,0,0,0.65);
       border-radius: 5px;
     }
-
     .chart-box {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      z-index: 1001;
-      background: white;
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-      width: 210px;
+      position: absolute; bottom: 20px; left: 20px; z-index: 1001;
+      background: white; padding: 10px; border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3); width: 210px;
     }
-
     .chart-box canvas {
-      width: 100% !important;
-      height: auto !important;
+      width: 100% !important; height: auto !important;
     }
-
     .chart-box p {
-      margin: 5px 0;
-      text-align: center;
-      font-weight: bold;
+      margin: 5px 0; text-align: center; font-weight: bold;
     }
   </style>
 </head>
@@ -127,10 +66,10 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="quarter-input" placeholder="QuarterNumber" />
-    <input type="text" id="block-input" placeholder="BlockNumber" />
     <input type="text" id="parcel-input" placeholder="ParcelNumber" />
-    <button onclick="searchByThreeFields()">بحث</button>
+    <input type="text" id="block-input" placeholder="BlockNumber" />
+    <input type="text" id="quarter-input" placeholder="QuarterNumber" />
+    <button onclick="searchByFields()">بحث</button>
   </div>
 
   <div class="chart-box">
@@ -190,13 +129,120 @@
           onEachFeature: function (feature, layer) {
             if (file === 'Buildings.geojson') {
               const props = feature.properties;
-              const distance = props.Distance;
-              const formattedDistance = distance === 0
-                ? '0'
-                : typeof distance === 'number'
-                  ? distance.toFixed(2)
-                  : 'N/A';
-
               const popupContent = `
-                <b>Status:</b> ${pro
+                <b>Status:</b> ${props.Status || 'N/A'}<br>
+                <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
+                <b>Location:</b> ${props.Location || 'N/A'}<br>
+                <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
+                <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
+                <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
+                <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
+                <b>Distance:</b> ${props.Distance?.toFixed?.(2) || '0'}
+              `;
+              layer.bindPopup(popupContent);
 
+              const status = props.Status || 'غير معروف';
+              statusCounts[status] = (statusCounts[status] || 0) + 1;
+            }
+          }
+        });
+
+        const layerName = file.split('.')[0];
+        overlayLayers[layerName] = layer;
+        layer.addTo(map);
+
+        if (file === 'Buildings.geojson') {
+          buildingLayer = layer;
+          setTimeout(displayStats, 500);
+        }
+      }
+    }
+
+    function displayStats() {
+      const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+      document.getElementById("total-count").textContent = total;
+
+      const ctx = document.getElementById('statusChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(statusCounts),
+          datasets: [{
+            data: Object.values(statusCounts),
+            backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#6c757d']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { font: { size: 12 } }
+            },
+            title: {
+              display: true,
+              text: 'نسبة حالة المباني'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw;
+                  const percentage = ((value / total) * 100).toFixed(2);
+                  return `${context.label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function searchByFields() {
+      const parcel = document.getElementById("parcel-input").value.trim();
+      const block = document.getElementById("block-input").value.trim();
+      const quarter = document.getElementById("quarter-input").value.trim();
+
+      if (!parcel || !block || !quarter || !buildingLayer) return;
+
+      let found = false;
+
+      buildingLayer.eachLayer(layer => {
+        const props = layer.feature.properties;
+        if (
+          props.ParcelNumber?.toString() === parcel &&
+          props.BlockNumber?.toString() === block &&
+          props.QuarterNumber?.toString() === quarter
+        ) {
+          map.setView(layer.getBounds().getCenter(), 17);
+          layer.openPopup();
+          found = true;
+        }
+      });
+
+      if (!found) {
+        alert("لم يتم العثور على تطابق للمدخلات.");
+      }
+    }
+
+    const legend = L.control({ position: 'bottomright' });
+    legend.onAdd = function (map) {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += "<b>Legend</b><br>";
+      div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
+      div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
+      div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
+      div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
+      return div;
+    };
+    legend.addTo(map);
+
+    setTimeout(() => {
+      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
+    }, 1000);
+
+    loadLayers();
+  </script>
+</body>
+</html>
