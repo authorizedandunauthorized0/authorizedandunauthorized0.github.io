@@ -75,10 +75,13 @@
     .search-box input {
       width: 120px;
       padding: 5px;
+      margin-bottom: 5px;
+      display: block;
     }
 
     .search-box button {
       padding: 5px 10px;
+      width: 100%;
     }
 
     .leaflet-control-zoom {
@@ -87,8 +90,8 @@
     }
 
     .leaflet-control-layers {
-      margin-top: 60px !important; /* لضبطها أسفل شريط العنوان */
-      z-index: 1003 !important;    /* أعلى من شريط العنوان (1002) */
+      margin-top: 60px !important;
+      z-index: 1003 !important;
       box-shadow: 0 1px 5px rgba(0,0,0,0.65);
       border-radius: 5px;
     }
@@ -124,8 +127,10 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="search-input" placeholder="ParcelNumber" />
-    <button onclick="searchByParcelNumber()">بحث</button>
+    <input type="text" id="quarter-input" placeholder="QuarterNumber" />
+    <input type="text" id="block-input" placeholder="BlockNumber" />
+    <input type="text" id="parcel-input" placeholder="ParcelNumber" />
+    <button onclick="searchByThreeFields()">بحث</button>
   </div>
 
   <div class="chart-box">
@@ -193,120 +198,5 @@
                   : 'N/A';
 
               const popupContent = `
-                <b>Status:</b> ${props.Status || 'N/A'}<br>
-                <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
-                <b>Location:</b> ${props.Location || 'N/A'}<br>
-                <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
-                <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
-                <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
-                <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
-                <b>Distance:</b> ${formattedDistance}
-              `;
-              layer.bindPopup(popupContent);
+                <b>Status:</b> ${pro
 
-              const status = props.Status || 'غير معروف';
-              statusCounts[status] = (statusCounts[status] || 0) + 1;
-            }
-          }
-        });
-
-        const layerName = file.split('.')[0];
-        overlayLayers[layerName] = layer;
-        layer.addTo(map);
-
-        if (file === 'Buildings.geojson') {
-          buildingLayer = layer;
-          setTimeout(() => {
-            displayStats();
-          }, 500);
-        }
-      }
-    }
-
-    function displayStats() {
-      const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
-      document.getElementById("total-count").textContent = total;
-
-      const ctx = document.getElementById('statusChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'pie',
-        data: {
-          labels: Object.keys(statusCounts),
-          datasets: [{
-            data: Object.values(statusCounts),
-            backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#6c757d']
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                font: {
-                  size: 12
-                }
-              }
-            },
-            title: {
-              display: true,
-              text: 'نسبة حالة المباني'
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const value = context.raw;
-                  const percentage = ((value / total) * 100).toFixed(2);
-                  return `${context.label}: ${value} (${percentage}%)`;
-                }
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function searchByParcelNumber() {
-      const input = document.getElementById("search-input").value.trim();
-      if (!input || !buildingLayer) return;
-
-      let found = false;
-
-      buildingLayer.eachLayer(function (layer) {
-        const props = layer.feature.properties;
-        if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
-          map.setView(layer.getBounds().getCenter(), 17);
-          layer.openPopup();
-          found = true;
-        }
-      });
-
-      if (!found) {
-        alert("لم يتم العثور على ParcelNumber.");
-      }
-    }
-
-    const legend = L.control({ position: 'bottomright' });
-
-    legend.onAdd = function (map) {
-      const div = L.DomUtil.create('div', 'legend');
-      div.innerHTML += "<b>Legend</b><br>";
-      div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
-      div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
-      div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
-      div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
-      return div;
-    };
-
-    legend.addTo(map);
-
-    setTimeout(() => {
-      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
-    }, 1000);
-
-    loadLayers();
-  </script>
-</body>
-</html>
