@@ -192,7 +192,7 @@
                   ? distance.toFixed(2)
                   : 'N/A';
 
-              const popupContent = `
+              const popupContent = 
                 <b>Status:</b> ${props.Status || 'N/A'}<br>
                 <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
                 <b>Location:</b> ${props.Location || 'N/A'}<br>
@@ -201,7 +201,7 @@
                 <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
                 <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
                 <b>Distance:</b> ${formattedDistance}
-              `;
+              ;
               layer.bindPopup(popupContent);
 
               const status = props.Status || 'غير معروف';
@@ -257,7 +257,7 @@
                 label: function(context) {
                   const value = context.raw;
                   const percentage = ((value / total) * 100).toFixed(2);
-                  return `${context.label}: ${value} (${percentage}%)`;
+                  return ${context.label}: ${value} (${percentage}%);
                 }
               }
             }
