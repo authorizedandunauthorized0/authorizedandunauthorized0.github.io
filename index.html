@@ -145,15 +145,15 @@
 
     const styles = {
       'Mazare_Alnoubani.json': { color: 'black', weight: 2, fillOpacity: 0 },
-      'Urban_Master_Plan.json': { color: 'gray', weight: 2, fillOpacity: 0.3 },
-      'Block_Mazare1.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare2.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare3.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare4.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare5.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare6.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Buildings.geojson': { color: 'brown', weight: 2, fillOpacity: 0.6 },
-      'Roads_InSide.json': { color: 'black', weight: 2 },
+      'Urban_Master_Plan.json': { color: 'brown', weight: 2, fillOpacity: 0.3 },
+      'Block_Mazare1.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare2.json': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare3.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare4.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare5.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare6.geojson': { color: 'orange', weight: 2, fillOpacity: 0.4 },
+      'Buildings.geojson': { color: 'red', weight: 2, fillOpacity: 0.6 },
+      'Roads_InSide.json': { color: 'gray', weight: 2 },
       'Roads_OutSide.json': { color: 'black', weight: 2 }
     };
 
@@ -192,7 +192,7 @@
                   ? distance.toFixed(2)
                   : 'N/A';
 
-              const popupContent = 
+              const popupContent = `
                 <b>Status:</b> ${props.Status || 'N/A'}<br>
                 <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
                 <b>Location:</b> ${props.Location || 'N/A'}<br>
@@ -201,7 +201,7 @@
                 <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
                 <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
                 <b>Distance:</b> ${formattedDistance}
-              ;
+              `;
               layer.bindPopup(popupContent);
 
               const status = props.Status || 'غير معروف';
@@ -257,7 +257,7 @@
                 label: function(context) {
                   const value = context.raw;
                   const percentage = ((value / total) * 100).toFixed(2);
-                  return ${context.label}: ${value} (${percentage}%);
+                  return `${context.label}: ${value} (${percentage}%)`;
                 }
               }
             }
@@ -291,11 +291,11 @@
     legend.onAdd = function (map) {
       const div = L.DomUtil.create('div', 'legend');
       div.innerHTML += "<b>Legend</b><br>";
-      div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
-      div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
-      div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
-      div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
+      div.innerHTML += '<i style="background: blue"></i> Mazare Alnoubani<br>';
+      div.innerHTML += '<i style="background: green"></i> Urban Master Plan<br>';
+      div.innerHTML += '<i style="background: orange"></i> Block Mazare (1–6)<br>';
+      div.innerHTML += '<i style="background: red"></i> Buildings<br>';
+      div.innerHTML += '<i style="background: gray"></i> Roads Inside<br>';
       div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
       return div;
     };
