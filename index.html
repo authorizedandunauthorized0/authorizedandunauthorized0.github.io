@@ -122,3 +122,176 @@
     <img src="https://raw.githubusercontent.com/authorizedandunauthorized0/authorizedandunauthorized0.github.io/main/university-logo.png" alt="شعار الجامعة" />
     <h1>Authorized And UnAuthorized Building Map</h1>
   </div>
+
+  <div class="search-box">
+    <input type="text" id="search-input" placeholder="ParcelNumber" />
+    <button onclick="searchByParcelNumber()">بحث</button>
+  </div>
+
+  <div class="chart-box">
+    <p>إجمالي عدد المباني: <span id="total-count">0</span></p>
+    <canvas id="statusChart"></canvas>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    var map = L.map('map').setView([32.0478311, 35.1635749], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const styles = {
+      'Mazare_Alnoubani.json': { color: 'rgb(0, 0, 0)', weight: 2, fillOpacity: 0 },
+      'Urban_Master_Plan.json': { color: 'rgb(189, 214, 175)', weight: 2, fillOpacity: 0.3 },
+      'Block_Mazare1.json': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare2.json': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare3.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare4.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare5.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare6.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Buildings.geojson': { color: 'rgb(168, 168, 168)', weight: 2, fillOpacity: 0.6, fillColor: 'rgb(225, 225, 225)' },
+      'Roads_InSide.json': { color: 'rgb(158, 170, 155)', weight: 2 },
+      'Roads_OutSide.json': { color: 'rgb(82, 93, 79)', weight: 2 }
+    };
+
+    const fileOrder = [
+      'Mazare_Alnoubani.json',
+      'Block_Mazare6.geojson',
+      'Block_Mazare5.geojson',
+      'Block_Mazare4.geojson',
+      'Block_Mazare3.geojson',
+      'Block_Mazare2.json',
+      'Block_Mazare1.json',
+      'Urban_Master_Plan.json',
+      'Roads_OutSide.json',
+      'Roads_InSide.json',
+      'Buildings.geojson'
+    ];
+
+    const overlayLayers = {};
+    let buildingLayer;
+    let statusCounts = {};
+
+    async function loadLayers() {
+      for (const file of fileOrder) {
+        const res = await fetch(file);
+        const data = await res.json();
+        // خصائص النمط حسب الطبقة
+        const styleOptions = styles[file] || { color: 'black', weight: 1 };
+
+        // تعديل خاص للطبقة Buildings لتطبيق لون تعبئة داخلي مختلف عن الحدود
+        const styleFunc = function(feature) {
+          if (file === 'Buildings.geojson') {
+            return {
+              color: 'rgb(168, 168, 168)',  // لون الحدود
+              weight: 2,
+              fillColor: 'rgb(225, 225, 225)', // لون التعبئة من الداخل
+              fillOpacity: 0.6
+            };
+          } else {
+            return styleOptions;
+          }
+        };
+
+        const layer = L.geoJSON(data, {
+          style: styleFunc,
+          onEachFeature: function (feature, layer) {
+            if (file === 'Buildings.geojson') {
+              const props = feature.properties;
+              const distance = props.Distance;
+              const formattedDistance = distance === 0
+                ? '0'
+                : typeof distance === 'number'
+                  ? distance.toFixed(2)
+                  : 'N/A';
+
+              const popupContent = `
+                <b>Status:</b> ${props.Status || 'N/A'}<br>
+                <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
+                <b>Location:</b> ${props.Location || 'N/A'}<br>
+                <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
+                <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
+                <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
+                <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
+                <b>Distance:</b> ${formattedDistance}
+              `;
+              layer.bindPopup(popupContent);
+
+              const status = props.Status || 'غير معروف';
+              statusCounts[status] = (statusCounts[status] || 0) + 1;
+            }
+          }
+        });
+
+        const layerName = file.split('.')[0];
+        overlayLayers[layerName] = layer;
+        layer.addTo(map);
+
+        if (file === 'Buildings.geojson') {
+          buildingLayer = layer;
+          setTimeout(() => {
+            displayStats();
+          }, 500);
+        }
+      }
+    }
+
+    function displayStats() {
+      const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+      document.getElementById("total-count").textContent = total;
+
+      const ctx = document.getElementById('statusChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(statusCounts),
+          datasets: [{
+            data: Object.values(statusCounts),
+            backgroundColor: ['#4CAF50', '#FFC107', '#F44336', '#2196F3', '#9E9E9E']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                font: {
+                  size: 14
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function searchByParcelNumber() {
+      const input = document.getElementById('search-input').value.trim();
+      if (!input) {
+        alert('يرجى إدخال رقم القطعة ParcelNumber');
+        return;
+      }
+
+      let found = false;
+      buildingLayer.eachLayer(layer => {
+        if (layer.feature && layer.feature.properties.ParcelNumber == input) {
+          map.fitBounds(layer.getBounds());
+          layer.openPopup();
+          found = true;
+        }
+      });
+
+      if (!found) {
+        alert('لم يتم العثور على المبنى برقم القطعة المدخل');
+      }
+    }
+
+    // تحميل الطبقات عند بداية تحميل الصفحة
+    loadLayers();
+  </script>
+</body>
+</html>
