@@ -266,25 +266,31 @@
       });
     }
 
-    function searchByParcelNumber() {
-      const input = document.getElementById("search-input").value.trim();
-      if (!input || !buildingLayer) return;
+ function searchByParcelNumber() {
+  const input = document.getElementById("search-input").value.trim();
+  if (!input || !buildingLayer) return;
 
-      let found = false;
+  let found = false;
 
-      buildingLayer.eachLayer(function (layer) {
-        const props = layer.feature.properties;
-        if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
-          map.setView(layer.getBounds().getCenter(), 17);
-          layer.openPopup();
-          found = true;
-        }
-      });
+  buildingLayer.eachLayer(function (layer) {
+    const props = layer.feature.properties;
 
-      if (!found) {
-        alert("لم يتم العثور على ParcelNumber.");
-      }
+    const matchesInput = 
+      (props.ParcelNumber && props.ParcelNumber.toString() === input) ||
+      (props.BlockNumber && props.BlockNumber.toString() === input) ||
+      (props.QuarterName_Arabic && props.QuarterName_Arabic.toString() === input);
+
+    if (matchesInput) {
+      map.setView(layer.getBounds().getCenter(), 17);
+      layer.openPopup();
+      found = true;
     }
+  });
+
+  if (!found) {
+    alert("لم يتم العثور على أي تطابق في ParcelNumber أو BlockNumber أو QuarterName_Arabic.");
+  }
+}
 
     const legend = L.control({ position: 'bottomright' });
 
