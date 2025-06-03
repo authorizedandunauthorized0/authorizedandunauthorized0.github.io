@@ -274,7 +274,7 @@
     function searchByFields() {
       const parcel = document.getElementById("parcel-input").value.trim();
       const block = document.getElementById("block-input").value.trim();
-      const quarter = document.getElementById("quarter-input").value.trim();
+      const quarter = document.getElementById("quarter-input").value.trim().toLowerCase();
 
       if (!buildingLayer) return;
 
@@ -283,9 +283,9 @@
       buildingLayer.eachLayer(function (layer) {
         const props = layer.feature.properties;
 
-        const matchParcel = parcel === "" || props.ParcelNumber?.toString() === parcel;
-        const matchBlock = block === "" || props.BlockNumber?.toString() === block;
-        const matchQuarter = quarter === "" || props.QuarterName_Arabic === quarter;
+        const matchParcel = parcel === "" || props.ParcelNumber?.toString().trim() === parcel;
+        const matchBlock = block === "" || props.BlockNumber?.toString().trim() === block;
+        const matchQuarter = quarter === "" || (props.QuarterName_Arabic && props.QuarterName_Arabic.trim().toLowerCase() === quarter);
 
         if (matchParcel && matchBlock && matchQuarter) {
           map.setView(layer.getBounds().getCenter(), 17);
@@ -295,7 +295,7 @@
       });
 
       if (!found) {
-        alert("لم يتم العثور على نتائج تطابق البيانات المدخلة.");
+        alert("لم يتم العثور على النتائج.");
       }
     }
 
