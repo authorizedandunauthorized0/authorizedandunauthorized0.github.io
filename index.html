@@ -75,10 +75,13 @@
     .search-box input {
       width: 120px;
       padding: 5px;
+      margin-bottom: 5px;
+      display: block;
     }
 
     .search-box button {
       padding: 5px 10px;
+      width: 100%;
     }
 
     .leaflet-control-zoom {
@@ -87,8 +90,8 @@
     }
 
     .leaflet-control-layers {
-      margin-top: 60px !important; /* لضبطها أسفل شريط العنوان */
-      z-index: 1003 !important;    /* أعلى من شريط العنوان (1002) */
+      margin-top: 60px !important;
+      z-index: 1003 !important;
       box-shadow: 0 1px 5px rgba(0,0,0,0.65);
       border-radius: 5px;
     }
@@ -124,8 +127,10 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="search-input" placeholder="ParcelNumber" />
-    <button onclick="searchByParcelNumber()">بحث</button>
+    <input type="text" id="parcel-input" placeholder="ParcelNumber" />
+    <input type="text" id="block-input" placeholder="BlockNumber" />
+    <input type="text" id="quarter-input" placeholder="QuarterName_Arabic" />
+    <button onclick="searchByFields()">بحث</button>
   </div>
 
   <div class="chart-box">
@@ -266,15 +271,23 @@
       });
     }
 
-    function searchByParcelNumber() {
-      const input = document.getElementById("search-input").value.trim();
-      if (!input || !buildingLayer) return;
+    function searchByFields() {
+      const parcel = document.getElementById("parcel-input").value.trim();
+      const block = document.getElementById("block-input").value.trim();
+      const quarter = document.getElementById("quarter-input").value.trim();
+
+      if (!buildingLayer) return;
 
       let found = false;
 
       buildingLayer.eachLayer(function (layer) {
         const props = layer.feature.properties;
-        if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
+
+        const matchParcel = parcel === "" || props.ParcelNumber?.toString() === parcel;
+        const matchBlock = block === "" || props.BlockNumber?.toString() === block;
+        const matchQuarter = quarter === "" || props.QuarterName_Arabic === quarter;
+
+        if (matchParcel && matchBlock && matchQuarter) {
           map.setView(layer.getBounds().getCenter(), 17);
           layer.openPopup();
           found = true;
@@ -282,7 +295,7 @@
       });
 
       if (!found) {
-        alert("لم يتم العثور على ParcelNumber.");
+        alert("لم يتم العثور على نتائج تطابق البيانات المدخلة.");
       }
     }
 
