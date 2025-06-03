@@ -7,100 +7,61 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    #map {
-      height: 100vh;
-    }
-
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #map { height: 100vh; }
     .top-bar {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
+      top: 0; left: 0; width: 100%;
       height: 60px;
       background-color: #0057b8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       z-index: 1002;
     }
-
     .top-bar img {
-      height: 40px;
-      margin-left: 20px;
-      position: absolute;
-      left: 10px;
+      height: 40px; margin-left: 20px;
+      position: absolute; left: 10px;
     }
-
     .top-bar h1 {
-      color: white;
-      font-size: 20px;
-      margin: 0;
+      color: white; font-size: 20px; margin: 0;
       text-align: center;
     }
-
+    .search-box {
+      position: absolute;
+      top: 70px; left: 20px;
+      z-index: 1001;
+      background: white; padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+    .search-box div {
+      margin-bottom: 5px;
+    }
+    .search-box input {
+      width: 160px;
+      padding: 5px;
+    }
+    .search-box button {
+      padding: 5px 10px;
+    }
+    .leaflet-control-zoom {
+      top: 180px !important; left: 20px !important;
+    }
     .legend {
-      background: white;
-      padding: 10px;
-      line-height: 1.5;
-      color: #333;
+      background: white; padding: 10px;
+      line-height: 1.5; color: #333;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
-
     .legend i {
       display: inline-block;
-      width: 18px;
-      height: 18px;
+      width: 18px; height: 18px;
       margin-right: 8px;
       vertical-align: middle;
       opacity: 0.7;
     }
-
-    .search-box {
-      position: absolute;
-      top: 70px;
-      left: 20px;
-      z-index: 1001;
-      background: white;
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    }
-
-    .search-box div {
-      margin-bottom: 5px;
-    }
-
-    .search-box input {
-      width: 120px;
-      padding: 5px;
-    }
-
-    .search-box button {
-      padding: 5px 10px;
-    }
-
-    .leaflet-control-zoom {
-      top: 190px !important;
-      left: 20px !important;
-    }
-
-    .leaflet-control-layers {
-      margin-top: 60px !important;
-      z-index: 1003 !important;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.65);
-      border-radius: 5px;
-    }
-
     .chart-box {
       position: absolute;
-      bottom: 20px;
-      left: 20px;
+      bottom: 20px; left: 20px;
       z-index: 1001;
       background: white;
       padding: 10px;
@@ -108,12 +69,10 @@
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
       width: 210px;
     }
-
     .chart-box canvas {
       width: 100% !important;
       height: auto !important;
     }
-
     .chart-box p {
       margin: 5px 0;
       text-align: center;
@@ -124,21 +83,21 @@
 <body>
   <div class="top-bar">
     <img src="https://raw.githubusercontent.com/authorizedandunauthorized0/authorizedandunauthorized0.github.io/main/university-logo.png" alt="شعار الجامعة" />
-    <h1>Authorized And UnAuthorized Building Map</h1>
+    <h1>Authorized And Unauthorized Building Map</h1>
   </div>
 
   <div class="search-box">
     <div>
-      <input type="text" id="search-parcel" placeholder="Parcel Number" />
+      <input type="text" id="search-parcel" placeholder="رقم القسيمة (ParcelNumber)" />
       <button onclick="searchByField('ParcelNumber', 'search-parcel')">بحث</button>
     </div>
     <div>
-      <input type="text" id="search-blocknum" placeholder="Block Number" />
-      <button onclick="searchByField('BlockNumber', 'search-blocknum')">بحث</button>
+      <input type="text" id="search-block" placeholder="رقم الحوض (BlockNumber)" />
+      <button onclick="searchByField('BlockNumber', 'search-block')">بحث</button>
     </div>
     <div>
-      <input type="text" id="search-blockname" placeholder="Block Name" />
-      <button onclick="searchByField('BlockName', 'search-blockname')">بحث</button>
+      <input type="text" id="search-quarter" placeholder="اسم الحي (QuarterName_Arabic)" />
+      <button onclick="searchByField('QuarterName_Arabic', 'search-quarter')">بحث</button>
     </div>
   </div>
 
@@ -199,13 +158,6 @@
           onEachFeature: function (feature, layer) {
             if (file === 'Buildings.geojson') {
               const props = feature.properties;
-              const distance = props.Distance;
-              const formattedDistance = distance === 0
-                ? '0'
-                : typeof distance === 'number'
-                  ? distance.toFixed(2)
-                  : 'N/A';
-
               const popupContent = `
                 <b>Status:</b> ${props.Status || 'N/A'}<br>
                 <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
@@ -213,11 +165,11 @@
                 <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
                 <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
                 <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
+                <b>QuarterName_Arabic:</b> ${props.QuarterName_Arabic || 'N/A'}<br>
                 <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
-                <b>Distance:</b> ${formattedDistance}
+                <b>Distance:</b> ${props.Distance?.toFixed(2) || 'N/A'}
               `;
               layer.bindPopup(popupContent);
-
               const status = props.Status || 'غير معروف';
               statusCounts[status] = (statusCounts[status] || 0) + 1;
             }
@@ -230,9 +182,7 @@
 
         if (file === 'Buildings.geojson') {
           buildingLayer = layer;
-          setTimeout(() => {
-            displayStats();
-          }, 500);
+          setTimeout(() => displayStats(), 500);
         }
       }
     }
@@ -254,21 +204,11 @@
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                font: {
-                  size: 12
-                }
-              }
-            },
-            title: {
-              display: true,
-              text: 'نسبة حالة المباني'
-            },
+            legend: { position: 'bottom' },
+            title: { display: true, text: 'نسبة حالة المباني' },
             tooltip: {
               callbacks: {
-                label: function(context) {
+                label: function (context) {
                   const value = context.raw;
                   const percentage = ((value / total) * 100).toFixed(2);
                   return `${context.label}: ${value} (${percentage}%)`;
@@ -283,9 +223,7 @@
     function searchByField(fieldName, inputId) {
       const input = document.getElementById(inputId).value.trim().toLowerCase();
       if (!input || !buildingLayer) return;
-
       let found = false;
-
       buildingLayer.eachLayer(function (layer) {
         const props = layer.feature.properties;
         const value = props[fieldName];
@@ -295,26 +233,20 @@
           found = true;
         }
       });
-
-      if (!found) {
-        alert("لم يتم العثور على نتيجة تطابق القيمة المدخلة.");
-      }
+      if (!found) alert("لم يتم العثور على نتيجة تطابق القيمة المدخلة.");
     }
 
     const legend = L.control({ position: 'bottomright' });
-
-    legend.onAdd = function (map) {
+    legend.onAdd = function () {
       const div = L.DomUtil.create('div', 'legend');
       div.innerHTML += "<b>Legend</b><br>";
       div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
       div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
       div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
       div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Inside / Outside<br>';
       return div;
     };
-
     legend.addTo(map);
 
     setTimeout(() => {
