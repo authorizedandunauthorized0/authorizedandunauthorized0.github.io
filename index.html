@@ -11,9 +11,11 @@
       margin: 0;
       font-family: Arial, sans-serif;
     }
+
     #map {
       height: 100vh;
     }
+
     .top-bar {
       position: absolute;
       top: 0;
@@ -26,18 +28,21 @@
       justify-content: center;
       z-index: 1002;
     }
+
     .top-bar img {
       height: 40px;
       margin-left: 20px;
       position: absolute;
       left: 10px;
     }
+
     .top-bar h1 {
       color: white;
       font-size: 20px;
       margin: 0;
       text-align: center;
     }
+
     .legend {
       background: white;
       padding: 10px;
@@ -46,6 +51,7 @@
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
+
     .legend i {
       display: inline-block;
       width: 18px;
@@ -54,6 +60,7 @@
       vertical-align: middle;
       opacity: 0.7;
     }
+
     .search-box {
       position: absolute;
       top: 70px;
@@ -64,23 +71,32 @@
       border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
+
+    .search-box div {
+      margin-bottom: 5px;
+    }
+
     .search-box input {
       width: 120px;
       padding: 5px;
     }
+
     .search-box button {
       padding: 5px 10px;
     }
+
     .leaflet-control-zoom {
-      top: 140px !important;
+      top: 190px !important;
       left: 20px !important;
     }
+
     .leaflet-control-layers {
       margin-top: 60px !important;
       z-index: 1003 !important;
       box-shadow: 0 1px 5px rgba(0,0,0,0.65);
       border-radius: 5px;
     }
+
     .chart-box {
       position: absolute;
       bottom: 20px;
@@ -92,10 +108,12 @@
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
       width: 210px;
     }
+
     .chart-box canvas {
       width: 100% !important;
       height: auto !important;
     }
+
     .chart-box p {
       margin: 5px 0;
       text-align: center;
@@ -110,8 +128,18 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="search-input" placeholder="ParcelNumber / BlockNumber / Quarter" />
-    <button onclick="searchByParcelNumber()">بحث</button>
+    <div>
+      <input type="text" id="search-parcel" placeholder="Parcel Number" />
+      <button onclick="searchByField('ParcelNumber', 'search-parcel')">بحث</button>
+    </div>
+    <div>
+      <input type="text" id="search-blocknum" placeholder="Block Number" />
+      <button onclick="searchByField('BlockNumber', 'search-blocknum')">بحث</button>
+    </div>
+    <div>
+      <input type="text" id="search-blockname" placeholder="Block Name" />
+      <button onclick="searchByField('BlockName', 'search-blockname')">بحث</button>
+    </div>
   </div>
 
   <div class="chart-box">
@@ -252,19 +280,16 @@
       });
     }
 
-    function searchByParcelNumber() {
-      const input = document.getElementById("search-input").value.trim().toLowerCase();
+    function searchByField(fieldName, inputId) {
+      const input = document.getElementById(inputId).value.trim().toLowerCase();
       if (!input || !buildingLayer) return;
 
       let found = false;
 
       buildingLayer.eachLayer(function (layer) {
         const props = layer.feature.properties;
-        const parcel = props.ParcelNumber ? props.ParcelNumber.toString().toLowerCase() : "";
-        const block = props.BlockNumber ? props.BlockNumber.toString().toLowerCase() : "";
-        const quarter = props.QuarterName_Arabic ? props.QuarterName_Arabic.toString().toLowerCase() : "";
-
-        if (parcel === input || block === input || quarter === input) {
+        const value = props[fieldName];
+        if (value && value.toString().toLowerCase() === input) {
           map.setView(layer.getBounds().getCenter(), 17);
           layer.openPopup();
           found = true;
@@ -272,7 +297,7 @@
       });
 
       if (!found) {
-        alert("لم يتم العثور على أي تطابق في ParcelNumber أو BlockNumber أو QuarterName_Arabic.");
+        alert("لم يتم العثور على نتيجة تطابق القيمة المدخلة.");
       }
     }
 
