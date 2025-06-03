@@ -7,54 +7,113 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
-    #map { height: 100vh; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    #map {
+      height: 100vh;
+    }
+
     .top-bar {
-      position: absolute; top: 0; left: 0; width: 100%; height: 60px;
-      background-color: #0057b8; display: flex; align-items: center;
-      justify-content: center; z-index: 1002;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: #0057b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1002;
     }
+
     .top-bar img {
-      height: 40px; margin-left: 20px; position: absolute; left: 10px;
+      height: 40px;
+      margin-left: 20px;
+      position: absolute;
+      left: 10px;
     }
+
     .top-bar h1 {
-      color: white; font-size: 20px; margin: 0; text-align: center;
+      color: white;
+      font-size: 20px;
+      margin: 0;
+      text-align: center;
     }
+
     .legend {
-      background: white; padding: 10px; line-height: 1.5; color: #333;
-      border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      background: white;
+      padding: 10px;
+      line-height: 1.5;
+      color: #333;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
+
     .legend i {
-      display: inline-block; width: 18px; height: 18px;
-      margin-right: 8px; vertical-align: middle; opacity: 0.7;
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+      vertical-align: middle;
+      opacity: 0.7;
     }
-    .search-container {
-      position: absolute; top: 70px; left: 20px; z-index: 1001;
-      background: white; padding: 10px; border-radius: 5px;
+
+    .search-box {
+      position: absolute;
+      top: 70px;
+      left: 20px;
+      z-index: 1001;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
-    .search-box {
-      margin-bottom: 10px;
-    }
+
     .search-box input {
-      width: 140px; padding: 5px;
+      width: 120px;
+      padding: 5px;
     }
+
     .search-box button {
       padding: 5px 10px;
     }
+
     .leaflet-control-zoom {
-      top: 240px !important; left: 20px !important;
+      top: 140px !important;
+      left: 20px !important;
     }
+
+    .leaflet-control-layers {
+      margin-top: 60px !important; /* لضبطها أسفل شريط العنوان */
+      z-index: 1003 !important;    /* أعلى من شريط العنوان (1002) */
+      box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+      border-radius: 5px;
+    }
+
     .chart-box {
-      position: absolute; bottom: 20px; left: 20px; z-index: 1001;
-      background: white; padding: 10px; border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3); width: 210px;
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1001;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      width: 210px;
     }
+
     .chart-box canvas {
-      width: 100% !important; height: auto !important;
+      width: 100% !important;
+      height: auto !important;
     }
+
     .chart-box p {
-      margin: 5px 0; text-align: center; font-weight: bold;
+      margin: 5px 0;
+      text-align: center;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -64,19 +123,9 @@
     <h1>Authorized And UnAuthorized Building Map</h1>
   </div>
 
-  <div class="search-container">
-    <div class="search-box">
-      <input type="text" id="search-parcel" placeholder="ParcelNumber" />
-    </div>
-    <div class="search-box">
-      <input type="text" id="search-block" placeholder="BlockNumber" />
-    </div>
-    <div class="search-box">
-      <input type="text" id="search-quarter" placeholder="QuarterName_Arabic" />
-    </div>
-    <div class="search-box">
-      <button onclick="search()">بحث</button>
-    </div>
+  <div class="search-box">
+    <input type="text" id="search-input" placeholder="ParcelNumber" />
+    <button onclick="searchByParcelNumber()">بحث</button>
   </div>
 
   <div class="chart-box">
@@ -149,7 +198,7 @@
                 <b>Location:</b> ${props.Location || 'N/A'}<br>
                 <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
                 <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
-                <b>QuarterName:</b> ${props.QuarterName_Arabic || 'N/A'}<br>
+                <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
                 <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
                 <b>Distance:</b> ${formattedDistance}
               `;
@@ -193,7 +242,11 @@
           plugins: {
             legend: {
               position: 'bottom',
-              labels: { font: { size: 12 } }
+              labels: {
+                font: {
+                  size: 12
+                }
+              }
             },
             title: {
               display: true,
@@ -213,23 +266,15 @@
       });
     }
 
-    function search() {
-      const parcelVal = document.getElementById('search-parcel').value.trim();
-      const blockVal = document.getElementById('search-block').value.trim();
-      const quarterVal = document.getElementById('search-quarter').value.trim();
-
-      if (!buildingLayer) return;
+    function searchByParcelNumber() {
+      const input = document.getElementById("search-input").value.trim();
+      if (!input || !buildingLayer) return;
 
       let found = false;
 
       buildingLayer.eachLayer(function (layer) {
         const props = layer.feature.properties;
-        const matches =
-          (!parcelVal || props.ParcelNumber?.toString() === parcelVal) &&
-          (!blockVal || props.BlockNumber?.toString() === blockVal) &&
-          (!quarterVal || props.QuarterName_Arabic?.toString() === quarterVal);
-
-        if (matches) {
+        if (props.ParcelNumber && props.ParcelNumber.toString() === input) {
           map.setView(layer.getBounds().getCenter(), 17);
           layer.openPopup();
           found = true;
@@ -237,21 +282,24 @@
       });
 
       if (!found) {
-        alert("لم يتم العثور على نتيجة.");
+        alert("لم يتم العثور على ParcelNumber.");
       }
     }
 
     const legend = L.control({ position: 'bottomright' });
-    legend.onAdd = function () {
+
+    legend.onAdd = function (map) {
       const div = L.DomUtil.create('div', 'legend');
       div.innerHTML += "<b>Legend</b><br>";
       div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
       div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
       div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
       div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
       return div;
     };
+
     legend.addTo(map);
 
     setTimeout(() => {
