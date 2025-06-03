@@ -75,13 +75,11 @@
     .search-box input {
       width: 120px;
       padding: 5px;
-      margin-bottom: 5px;
-      display: block;
+      margin: 2px 0;
     }
 
     .search-box button {
       padding: 5px 10px;
-      width: 100%;
     }
 
     .leaflet-control-zoom {
@@ -130,7 +128,7 @@
     <input type="text" id="parcel-input" placeholder="ParcelNumber" />
     <input type="text" id="block-input" placeholder="BlockNumber" />
     <input type="text" id="quarter-input" placeholder="QuarterName_Arabic" />
-    <button onclick="searchByFields()">بحث</button>
+    <button onclick="searchBuildings()">بحث</button>
   </div>
 
   <div class="chart-box">
@@ -271,9 +269,9 @@
       });
     }
 
-    function searchByFields() {
-      const parcel = document.getElementById("parcel-input").value.trim();
-      const block = document.getElementById("block-input").value.trim();
+    function searchBuildings() {
+      const parcel = document.getElementById("parcel-input").value.trim().toLowerCase();
+      const block = document.getElementById("block-input").value.trim().toLowerCase();
       const quarter = document.getElementById("quarter-input").value.trim().toLowerCase();
 
       if (!buildingLayer) return;
@@ -283,9 +281,9 @@
       buildingLayer.eachLayer(function (layer) {
         const props = layer.feature.properties;
 
-        const matchParcel = parcel === "" || props.ParcelNumber?.toString().trim() === parcel;
-        const matchBlock = block === "" || props.BlockNumber?.toString().trim() === block;
-        const matchQuarter = quarter === "" || (props.QuarterName_Arabic && props.QuarterName_Arabic.trim().toLowerCase() === quarter);
+        const matchParcel = parcel === "" || props.ParcelNumber?.toString().trim().toLowerCase().includes(parcel);
+        const matchBlock = block === "" || props.BlockNumber?.toString().trim().toLowerCase().includes(block);
+        const matchQuarter = quarter === "" || (props.QuarterName_Arabic && props.QuarterName_Arabic.trim().toLowerCase().includes(quarter));
 
         if (matchParcel && matchBlock && matchQuarter) {
           map.setView(layer.getBounds().getCenter(), 17);
@@ -295,7 +293,7 @@
       });
 
       if (!found) {
-        alert("لم يتم العثور على النتائج.");
+        alert("لم يتم العثور على نتيجة تطابق المدخلات.");
       }
     }
 
