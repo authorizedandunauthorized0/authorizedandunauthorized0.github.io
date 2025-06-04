@@ -1,158 +1,338 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
-  <title>خريطة رام الله - توزيع الطبقات</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Leaflet CSS -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>خريطة المباني المرخصة وغير المرخصة</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.0/dist/geosearch.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body, html { margin: 0; padding: 0; height: 100%; }
-    #map { width: 100%; height: 100%; }
-    .topbar {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 1000;
-      background: white;
-      padding: 10px 15px;
-      border-radius: 10px;
+    body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      font-size: 16px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-      direction: rtl;
     }
+
+    #map {
+      height: 100vh;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: #0057b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1002;
+    }
+
+    .top-bar img {
+      height: 40px;
+      margin-left: 20px;
+      position: absolute;
+      left: 10px;
+    }
+
+    .top-bar h1 {
+      color: white;
+      font-size: 20px;
+      margin: 0;
+      text-align: center;
+    }
+
     .legend {
       background: white;
       padding: 10px;
-      font-size: 14px;
-      line-height: 1.6em;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.2);
-      direction: rtl;
+      line-height: 1.5;
+      color: #333;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
+
     .legend i {
-      width: 20px;
-      height: 20px;
-      float: right;
-      margin-left: 8px;
-      opacity: 0.8;
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+      vertical-align: middle;
+      opacity: 0.7;
+    }
+
+    .search-box {
+      position: absolute;
+      top: 70px;
+      left: 20px;
+      z-index: 1001;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+
+    .search-box input {
+      width: 120px;
+      padding: 5px;
+      margin: 2px 0;
+    }
+
+    .search-box button {
+      padding: 5px 10px;
+      background-color: #0057b8;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .search-box button:hover {
+      background-color: #003f8a;
+    }
+
+    }
+
+    .leaflet-control-zoom {
+      top: 140px !important;
+      left: 20px !important;
+    }
+
+    .leaflet-control-layers {
+      margin-top: 60px !important;
+      z-index: 1003 !important;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+      border-radius: 5px;
+    }
+
+    .chart-box {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1001;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      width: 210px;
+    }
+
+    .chart-box canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    .chart-box p {
+      margin: 5px 0;
+      text-align: center;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
+  <div class="top-bar">
+    <img src="https://raw.githubusercontent.com/authorizedandunauthorized0/authorizedandunauthorized0.github.io/main/university-logo.png" alt="شعار الجامعة" />
+    <h1>Authorized And UnAuthorized Building Map</h1>
+  </div>
 
-<div class="topbar">خريطة توزيع الطبقات في مدينة رام الله</div>
-<div id="map"></div>
+  <div class="search-box">
+    <input type="text" id="parcel-input" placeholder="ParcelNumber" />
+    <input type="text" id="block-input" placeholder="BlockNumber" />
+    <input type="text" id="quarter-input" placeholder="QuarterName_Arabic" />
+    <button onclick="searchBuildings()">بحث</button>
+  </div>
 
-<!-- مكتبات Leaflet -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-geosearch@3.11.0/dist/bundle.min.js"></script>
-<script src="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
+  <div class="chart-box">
+    <p>إجمالي عدد المباني: <span id="total-count">0</span></p>
+    <canvas id="statusChart"></canvas>
+  </div>
 
-<script>
-  var map = L.map('map').setView([31.9, 35.2], 13);
+  <div id="map"></div>
 
-  // طبقة الخلفية
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    var map = L.map('map').setView([32.0478311, 35.1635749], 15);
 
-  // تحميل الطبقات
-  function addLayer(file, style) {
-    fetch(file)
-      .then(res => res.json())
-      .then(data => {
-        L.geoJSON(data, { style: style }).addTo(map);
-      });
-  }
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-  // المباني
-  addLayer('buildings.geojson', {
-    fillColor: 'rgb(225, 225, 225)',
-    color: 'rgb(168, 168, 168)',
-    weight: 1,
-    fillOpacity: 0.7
-  });
+    const styles = {
+      'Mazare_Alnoubani.json': { color: 'black', weight: 2, fillOpacity: 0 },
+      'Urban_Master_Plan.json': { color: 'gray', weight: 2, fillOpacity: 0.3 },
+      'Block_Mazare1.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare2.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare3.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare4.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare5.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare6.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Buildings.geojson': { color: 'brown', weight: 2, fillOpacity: 0.6 },
+      'Roads_InSide.json': { color: 'black', weight: 2 },
+      'Roads_OutSide.json': { color: 'black', weight: 2 }
+    };
 
-  // الشوارع الداخلية
-  addLayer('Roads_InSide.json', {
-    color: 'rgb(158, 170, 155)',
-    weight: 2
-  });
+    const fileOrder = [
+      'Mazare_Alnoubani.json',
+      'Block_Mazare6.geojson',
+      'Block_Mazare5.geojson',
+      'Block_Mazare4.geojson',
+      'Block_Mazare3.geojson',
+      'Block_Mazare2.json',
+      'Block_Mazare1.json',
+      'Urban_Master_Plan.json',
+      'Roads_OutSide.json',
+      'Roads_InSide.json',
+      'Buildings.geojson'
+    ];
 
-  // الشوارع الخارجية
-  addLayer('Roads_OutSide.json', {
-    color: 'rgb(82, 93, 79)',
-    weight: 3
-  });
+    const overlayLayers = {};
+    let buildingLayer;
+    let statusCounts = {};
 
-  // مزارع النوباني
-  addLayer('mazariAlNubani.geojson', {
-    fillColor: 'rgb(0, 0, 0)',
-    color: 'rgb(0, 0, 0)',
-    weight: 1,
-    fillOpacity: 0.7
-  });
+    async function loadLayers() {
+      for (const file of fileOrder) {
+        const res = await fetch(file);
+        const data = await res.json();
 
-  // Urban Master Plan
-  addLayer('urbanMasterPlan.geojson', {
-    fillColor: 'rgb(189, 214, 175)',
-    color: 'rgb(189, 214, 175)',
-    weight: 1,
-    fillOpacity: 0.6
-  });
+        const layer = L.geoJSON(data, {
+          style: styles[file],
+          onEachFeature: function (feature, layer) {
+            if (file === 'Buildings.geojson') {
+              const props = feature.properties;
+              const distance = props.Distance;
+              const formattedDistance = distance === 0
+                ? '0'
+                : typeof distance === 'number'
+                  ? distance.toFixed(2)
+                  : 'N/A';
 
-  // الأحواض من 1 إلى 6
-  addLayer('zones1to6.geojson', {
-    fillColor: 'rgb(143, 188, 112)',
-    color: 'rgb(143, 188, 112)',
-    weight: 1,
-    fillOpacity: 0.6
-  });
+              const popupContent = `
+                <b>Status:</b> ${props.Status || 'N/A'}<br>
+                <b>CommunityName:</b> ${props.CommunityName || 'N/A'}<br>
+                <b>Location:</b> ${props.Location || 'N/A'}<br>
+                <b>BlockNumber:</b> ${props.BlockNumber || 'N/A'}<br>
+                <b>BlockName:</b> ${props.BlockName || 'N/A'}<br>
+                <b>QuarterName:</b> ${props.QuarterName || 'N/A'}<br>
+                <b>ParcelNumber:</b> ${props.ParcelNumber || 'N/A'}<br>
+                <b>Distance:</b> ${formattedDistance}
+              `;
+              layer.bindPopup(popupContent);
 
-  // أداة تحديد الموقع
-  L.control.locate({
-    position: 'topright',
-    flyTo: true,
-    strings: {
-      title: "تحديد موقعي"
+              const status = props.Status || 'غير معروف';
+              statusCounts[status] = (statusCounts[status] || 0) + 1;
+            }
+          }
+        });
+
+        const layerName = file.split('.')[0];
+        overlayLayers[layerName] = layer;
+        layer.addTo(map);
+
+        if (file === 'Buildings.geojson') {
+          buildingLayer = layer;
+          setTimeout(() => {
+            displayStats();
+          }, 500);
+        }
+      }
     }
-  }).addTo(map);
 
-  // أداة البحث
-  const search = new window.GeoSearch.GeoSearchControl({
-    provider: new window.GeoSearch.OpenStreetMapProvider(),
-    style: 'bar',
-    showMarker: true,
-    autoClose: true,
-    retainZoomLevel: false,
-    searchLabel: 'ابحث هنا...',
-    notFoundMessage: 'العنوان غير موجود',
-    keepResult: false
-  });
-  map.addControl(search);
+    function displayStats() {
+      const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+      document.getElementById("total-count").textContent = total;
 
-  // وسيلة الإيضاح
-  var legend = L.control({position: 'bottomleft'});
-  legend.onAdd = function () {
-    var div = L.DomUtil.create('div', 'legend');
-    div.innerHTML += '<b>وسيلة الإيضاح</b><br>';
-    div.innerHTML += '<i style="background: rgb(225, 225, 225); border:1px solid rgb(168, 168, 168);"></i> المباني<br>';
-    div.innerHTML += '<i style="background: rgb(158, 170, 155);"></i> الشوارع الداخلية<br>';
-    div.innerHTML += '<i style="background: rgb(82, 93, 79);"></i> الشوارع الخارجية<br>';
-    div.innerHTML += '<i style="background: rgb(0, 0, 0);"></i> مزارع النوباني<br>';
-    div.innerHTML += '<i style="background: rgb(189, 214, 175);"></i> Urban Master Plan<br>';
-    div.innerHTML += '<i style="background: rgb(143, 188, 112);"></i> الأحواض من 1 إلى 6<br>';
-    return div;
-  };
-  legend.addTo(map);
-</script>
+      const ctx = document.getElementById('statusChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(statusCounts),
+          datasets: [{
+            data: Object.values(statusCounts),
+            backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#6c757d']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                font: {
+                  size: 12
+                }
+              }
+            },
+            title: {
+              display: true,
+              text: 'نسبة حالة المباني'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw;
+                  const percentage = ((value / total) * 100).toFixed(2);
+                  return `${context.label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
 
+    function searchBuildings() {
+      const parcel = document.getElementById("parcel-input").value.trim().toLowerCase();
+      const block = document.getElementById("block-input").value.trim().toLowerCase();
+      const quarter = document.getElementById("quarter-input").value.trim().toLowerCase();
+
+      if (!buildingLayer) return;
+
+      let found = false;
+
+      buildingLayer.eachLayer(function (layer) {
+        const props = layer.feature.properties;
+
+        // نستخدم QuarterName بدل QuarterName_Arabic لأن بيانات المباني تحتويه
+        const matchParcel = parcel === "" || (props.ParcelNumber && props.ParcelNumber.toString().trim().toLowerCase() === parcel);
+        const matchBlock = block === "" || (props.BlockNumber && props.BlockNumber.toString().trim().toLowerCase().includes(block));
+        const matchQuarter = quarter === "" || (props.QuarterName && props.QuarterName.trim().toLowerCase().includes(quarter));
+
+        if (matchParcel && matchBlock && matchQuarter) {
+          map.setView(layer.getBounds().getCenter(), 17);
+          layer.openPopup();
+          found = true;
+          return;
+        }
+      });
+
+      if (!found) {
+        alert("لم يتم العثور على مبنى بالمعايير المحددة.");
+      }
+    }
+
+
+    const legend = L.control({ position: 'bottomright' });
+
+    legend.onAdd = function (map) {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += "<b>Legend</b><br>";
+      div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
+      div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
+      div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
+      div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
+      return div;
+    };
+
+    legend.addTo(map);
+
+    setTimeout(() => {
+      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
+    }, 1000);
+
+    loadLayers();
+  </script>
 </body>
 </html>
+
+
