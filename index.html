@@ -58,7 +58,7 @@
       height: 18px;
       margin-right: 8px;
       vertical-align: middle;
-      opacity: 0.7;
+      opacity: 0.8;
     }
 
     .search-box {
@@ -88,8 +88,6 @@
     }
     .search-box button:hover {
       background-color: #003f8a;
-    }
-
     }
 
     .leaflet-control-zoom {
@@ -157,17 +155,17 @@
     }).addTo(map);
 
     const styles = {
-      'Mazare_Alnoubani.json': { color: 'black', weight: 2, fillOpacity: 0 },
-      'Urban_Master_Plan.json': { color: 'gray', weight: 2, fillOpacity: 0.3 },
-      'Block_Mazare1.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare2.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare3.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare4.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare5.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare6.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Buildings.geojson': { color: 'brown', weight: 2, fillOpacity: 0.6 },
-      'Roads_InSide.json': { color: 'black', weight: 2 },
-      'Roads_OutSide.json': { color: 'black', weight: 2 }
+      'Mazare_Alnoubani.json': { color: '#000000', weight: 2, fillOpacity: 0 }, // أسود بدون تعبئة
+      'Urban_Master_Plan.json': { color: '#696969', weight: 2, fillOpacity: 0.25 }, // رمادي داكن مع تعبئة خفيفة
+      'Block_Mazare1.json': { color: '#8B4513', weight: 2, fillOpacity: 0.4 }, // بني داكن
+      'Block_Mazare2.json': { color: '#8B4513', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare3.geojson': { color: '#8B4513', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare4.geojson': { color: '#8B4513', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare5.geojson': { color: '#8B4513', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare6.geojson': { color: '#8B4513', weight: 2, fillOpacity: 0.4 },
+      'Buildings.geojson': { color: '#B22222', weight: 2, fillOpacity: 0.6 }, // أحمر داكن مع تعبئة
+      'Roads_InSide.json': { color: '#1E90FF', weight: 3 }, // أزرق ساطع
+      'Roads_OutSide.json': { color: '#104E8B', weight: 3 } // أزرق داكن
     };
 
     const fileOrder = [
@@ -247,7 +245,7 @@
           labels: Object.keys(statusCounts),
           datasets: [{
             data: Object.values(statusCounts),
-            backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#6c757d']
+            backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#6c757d'] // أخضر، أحمر، أصفر، رمادي
           }]
         },
         options: {
@@ -284,20 +282,15 @@
       const block = document.getElementById("block-input").value.trim().toLowerCase();
       const quarter = document.getElementById("quarter-input").value.trim().toLowerCase();
 
-      if (!buildingLayer) return;
-
       let found = false;
-
-      buildingLayer.eachLayer(function (layer) {
+      buildingLayer.eachLayer(function(layer) {
         const props = layer.feature.properties;
-
-        // نستخدم QuarterName بدل QuarterName_Arabic لأن بيانات المباني تحتويه
-        const matchParcel = parcel === "" || (props.ParcelNumber && props.ParcelNumber.toString().trim().toLowerCase() === parcel);
-        const matchBlock = block === "" || (props.BlockNumber && props.BlockNumber.toString().trim().toLowerCase().includes(block));
-        const matchQuarter = quarter === "" || (props.QuarterName && props.QuarterName.trim().toLowerCase().includes(quarter));
+        const matchParcel = parcel === "" || (props.ParcelNumber && props.ParcelNumber.toLowerCase().includes(parcel));
+        const matchBlock = block === "" || (props.BlockNumber && props.BlockNumber.toLowerCase().includes(block));
+        const matchQuarter = quarter === "" || (props.QuarterName && props.QuarterName.toLowerCase().includes(quarter));
 
         if (matchParcel && matchBlock && matchQuarter) {
-          map.setView(layer.getBounds().getCenter(), 17);
+          map.fitBounds(layer.getBounds());
           layer.openPopup();
           found = true;
           return;
@@ -305,33 +298,29 @@
       });
 
       if (!found) {
-        alert("لم يتم العثور على مبنى بالمعايير المحددة.");
+        alert("لم يتم العثور على المبنى.");
       }
     }
 
+    loadLayers();
 
-    const legend = L.control({ position: 'bottomright' });
+    // إضافة وسيلة إيضاح (Legend)
+    const legend = L.control({position: 'bottomright'});
 
-    legend.onAdd = function (map) {
+    legend.onAdd = function(map) {
       const div = L.DomUtil.create('div', 'legend');
-      div.innerHTML += "<b>Legend</b><br>";
-      div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
-      div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
-      div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
-      div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
+      div.innerHTML += "<h4>وسيلة الإيضاح</h4>";
+      div.innerHTML += '<i style="background: #B22222"></i> المباني<br>';
+      div.innerHTML += '<i style="background: #8B4513"></i> البلوكات<br>';
+      div.innerHTML += '<i style="background: #696969"></i> خطة رئيسية<br>';
+      div.innerHTML += '<i style="background: #1E90FF"></i> الطرق الداخلية<br>';
+      div.innerHTML += '<i style="background: #104E8B"></i> الطرق الخارجية<br>';
+      div.innerHTML += '<i style="background: #000000"></i> حدود مزرعة النوباني<br>';
       return div;
     };
 
     legend.addTo(map);
 
-    setTimeout(() => {
-      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
-    }, 1000);
-
-    loadLayers();
   </script>
 </body>
 </html>
-
