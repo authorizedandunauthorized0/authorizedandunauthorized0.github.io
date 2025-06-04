@@ -270,9 +270,9 @@
     }
 
 function searchBuildings() {
-  const parcel = document.getElementById("parcel-input").value.trim();
-  const block = document.getElementById("block-input").value.trim();
-  const quarter = document.getElementById("quarter-input").value.trim();
+  const parcelInput = document.getElementById("parcel-input").value.trim();
+  const blockInput = document.getElementById("block-input").value.trim();
+  const quarterInput = document.getElementById("quarter-input").value.trim();
 
   if (!buildingLayer) return;
 
@@ -281,9 +281,10 @@ function searchBuildings() {
   buildingLayer.eachLayer(function (layer) {
     const props = layer.feature.properties;
 
-    const matchParcel = parcel === "" || (props.ParcelNumber && props.ParcelNumber.toString().trim() === parcel);
-    const matchBlock = block === "" || (props.BlockNumber && props.BlockNumber.toString().trim() === block);
-    const matchQuarter = quarter === "" || (props.QuarterName_Arabic && props.QuarterName_Arabic.trim() === quarter);
+    // المقارنات الدقيقة حسب القيم المُدخلة فقط
+    const matchParcel = parcelInput === "" || (props.ParcelNumber !== undefined && Number(parcelInput) === Number(props.ParcelNumber));
+    const matchBlock = blockInput === "" || (props.BlockNumber !== undefined && blockInput === props.BlockNumber.trim());
+    const matchQuarter = quarterInput === "" || (props.QuarterName_Arabic !== undefined && quarterInput === props.QuarterName_Arabic.trim());
 
     if (matchParcel && matchBlock && matchQuarter) {
       map.setView(layer.getBounds().getCenter(), 17);
