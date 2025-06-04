@@ -269,33 +269,33 @@
       });
     }
 
-    function searchBuildings() {
-      const parcel = document.getElementById("parcel-input").value.trim().toLowerCase();
-      const block = document.getElementById("block-input").value.trim().toLowerCase();
-      const quarter = document.getElementById("quarter-input").value.trim().toLowerCase();
+function searchBuildings() {
+  const parcel = document.getElementById("parcel-input").value.trim();
+  const block = document.getElementById("block-input").value.trim();
+  const quarter = document.getElementById("quarter-input").value.trim();
 
-      if (!buildingLayer) return;
+  if (!buildingLayer) return;
 
-      let found = false;
+  let found = false;
 
-      buildingLayer.eachLayer(function (layer) {
-        const props = layer.feature.properties;
+  buildingLayer.eachLayer(function (layer) {
+    const props = layer.feature.properties;
 
-        const matchParcel = parcel === "" || props.ParcelNumber?.toString().trim().toLowerCase().includes(parcel);
-        const matchBlock = block === "" || props.BlockNumber?.toString().trim().toLowerCase().includes(block);
-        const matchQuarter = quarter === "" || (props.QuarterName_Arabic && props.QuarterName_Arabic.trim().toLowerCase().includes(quarter));
+    const matchParcel = parcel === "" || (props.ParcelNumber && props.ParcelNumber.toString().trim() === parcel);
+    const matchBlock = block === "" || (props.BlockNumber && props.BlockNumber.toString().trim() === block);
+    const matchQuarter = quarter === "" || (props.QuarterName_Arabic && props.QuarterName_Arabic.trim() === quarter);
 
-        if (matchParcel && matchBlock && matchQuarter) {
-          map.setView(layer.getBounds().getCenter(), 17);
-          layer.openPopup();
-          found = true;
-        }
-      });
-
-      if (!found) {
-        alert("لم يتم العثور على نتيجة تطابق المدخلات.");
-      }
+    if (matchParcel && matchBlock && matchQuarter) {
+      map.setView(layer.getBounds().getCenter(), 17);
+      layer.openPopup();
+      found = true;
     }
+  });
+
+  if (!found) {
+    alert("لم يتم العثور على نتيجة تطابق المدخلات.");
+  }
+}
 
     const legend = L.control({ position: 'bottomright' });
 
