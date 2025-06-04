@@ -269,35 +269,38 @@
       });
     }
 
-    function searchBuildings() {
-      const parcel = document.getElementById("parcel-input").value.trim().toLowerCase();
-      const block = document.getElementById("block-input").value.trim().toLowerCase();
-      const quarter = document.getElementById("quarter-input").value.trim().toLowerCase();
+function searchBuildings() {
+  const parcel = document.getElementById("parcel-input").value.trim();
+  const block = document.getElementById("block-input").value.trim().toLowerCase();
+  const quarter = document.getElementById("quarter-input").value.trim().toLowerCase();
 
-      if (!buildingLayer) return;
+  if (!buildingLayer) return;
 
-      let found = false;
+  let found = false;
 
-      buildingLayer.eachLayer(function (layer) {
-        const props = layer.feature.properties;
+  buildingLayer.eachLayer(function (layer) {
+    const props = layer.feature.properties;
 
-        // نستخدم QuarterName بدل QuarterName_Arabic لأن بيانات المباني تحتويه
-        const matchParcel = parcel === "" || (props.ParcelNumber && props.ParcelNumber.toString().trim().toLowerCase().includes(parcel));
-        const matchBlock = block === "" || (props.BlockNumber && props.BlockNumber.toString().trim().toLowerCase().includes(block));
-        const matchQuarter = quarter === "" || (props.QuarterName && props.QuarterName.trim().toLowerCase().includes(quarter));
+    const propParcel = props.ParcelNumber !== undefined ? props.ParcelNumber.toString().trim() : "";
+    const propBlock = props.BlockNumber !== undefined ? props.BlockNumber.toString().trim().toLowerCase() : "";
+    const propQuarter = props.QuarterName !== undefined ? props.QuarterName.trim().toLowerCase() : "";
 
-        if (matchParcel && matchBlock && matchQuarter) {
-          map.setView(layer.getBounds().getCenter(), 17);
-          layer.openPopup();
-          found = true;
-          return;
-        }
-      });
+    const matchParcel = parcel === "" || parcel === propParcel;
+    const matchBlock = block === "" || propBlock.includes(block);
+    const matchQuarter = quarter === "" || propQuarter.includes(quarter);
 
-      if (!found) {
-        alert("لم يتم العثور على المبنى بالمعايير المحددة.");
-      }
+    if (matchParcel && matchBlock && matchQuarter) {
+      map.setView(layer.getBounds().getCenter(), 17);
+      layer.openPopup();
+      found = true;
     }
+  });
+
+  if (!found) {
+    alert("لم يتم العثور على أي مبنى يطابق البحث.");
+  }
+}
+
 
     loadLayers();
   </script>
