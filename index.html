@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    /* ... نفس التنسيقات السابقة ... */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -70,6 +71,9 @@
       padding: 10px;
       border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      display: flex;
+      gap: 5px;
+      align-items: center;
     }
 
     .search-box input {
@@ -88,8 +92,6 @@
     }
     .search-box button:hover {
       background-color: #003f8a;
-    }
-
     }
 
     .leaflet-control-zoom {
@@ -139,6 +141,7 @@
     <input type="text" id="block-input" placeholder="BlockNumber" />
     <input type="text" id="quarter-input" placeholder="QuarterName_Arabic" />
     <button onclick="searchBuildings()">بحث</button>
+    <button onclick="clearSearch()">مسح</button>
   </div>
 
   <div class="chart-box">
@@ -187,6 +190,7 @@
     const overlayLayers = {};
     let buildingLayer;
     let statusCounts = {};
+    let lastFoundLayer = null; // لتخزين الطبقة المفتوحة حاليا
 
     async function loadLayers() {
       for (const file of fileOrder) {
@@ -284,55 +288,47 @@
       const block = document.getElementById("block-input").value.trim().toLowerCase();
       const quarter = document.getElementById("quarter-input").value.trim().toLowerCase();
 
-      if (!buildingLayer) return;
+      if (!parcel && !block && !quarter) {
+        alert('يرجى إدخال قيمة على الأقل في أحد الحقول للبحث.');
+        return;
+      }
 
       let found = false;
 
       buildingLayer.eachLayer(function (layer) {
         const props = layer.feature.properties;
-
-        // نستخدم QuarterName بدل QuarterName_Arabic لأن بيانات المباني تحتويه
-        const matchParcel = parcel === "" || (props.ParcelNumber && props.ParcelNumber.toString().trim().toLowerCase() === parcel);
-        const matchBlock = block === "" || (props.BlockNumber && props.BlockNumber.toString().trim().toLowerCase().includes(block));
-        const matchQuarter = quarter === "" || (props.QuarterName && props.QuarterName.trim().toLowerCase().includes(quarter));
+        const matchParcel = parcel ? (props.ParcelNumber && props.ParcelNumber.toString().toLowerCase().includes(parcel)) : true;
+        const matchBlock = block ? (props.BlockNumber && props.BlockNumber.toString().toLowerCase().includes(block)) : true;
+        const matchQuarter = quarter ? (props.QuarterName && props.QuarterName.toString().toLowerCase().includes(quarter)) : true;
 
         if (matchParcel && matchBlock && matchQuarter) {
-          map.setView(layer.getBounds().getCenter(), 17);
+          if (lastFoundLayer) lastFoundLayer.closePopup();
+          lastFoundLayer = layer;
           layer.openPopup();
+          map.fitBounds(layer.getBounds());
           found = true;
           return;
         }
       });
 
       if (!found) {
-        alert("لم يتم العثور على مبنى بالمعايير المحددة.");
+        alert("لم يتم العثور على مبنى مطابق للبحث.");
       }
     }
 
+    // دالة لمسح البحث ومسح أي نوافذ منبثقة مفتوحة
+    function clearSearch() {
+      document.getElementById("parcel-input").value = '';
+      document.getElementById("block-input").value = '';
+      document.getElementById("quarter-input").value = '';
 
-    const legend = L.control({ position: 'bottomright' });
-
-    legend.onAdd = function (map) {
-      const div = L.DomUtil.create('div', 'legend');
-      div.innerHTML += "<b>Legend</b><br>";
-      div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
-      div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
-      div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
-      div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
-      return div;
-    };
-
-    legend.addTo(map);
-
-    setTimeout(() => {
-      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
-    }, 1000);
+      if (lastFoundLayer) {
+        lastFoundLayer.closePopup();
+        lastFoundLayer = null;
+      }
+    }
 
     loadLayers();
   </script>
 </body>
 </html>
-
-
