@@ -270,9 +270,9 @@
     }
 
 function searchBuildings() {
-  const parcelInput = document.getElementById('parcel-input').value.trim();
-  const blockInput = document.getElementById('block-input').value.trim();
-  const quarterInput = document.getElementById('quarter-input').value.trim();
+  const parcelInput = document.getElementById('parcel-input').value.trim().toLowerCase();
+  const blockInput = document.getElementById('block-input').value.trim().toLowerCase();
+  const quarterInput = document.getElementById('quarter-input').value.trim().toLowerCase();
 
   console.log("بحث عن:", { parcelInput, blockInput, quarterInput });
 
@@ -281,29 +281,23 @@ function searchBuildings() {
   buildingLayer.eachLayer(function(layer) {
     const props = layer.feature.properties;
 
-    // طباعة خصائص الطبقة (للتأكد من الحقول والقيم)
-    console.log("خصائص الطبقة:", props);
-
-    // بقية الكود...
-    const parcelNum = props.ParcelNumber !== undefined ? String(props.ParcelNumber).trim() : "";
-    const blockNum = props.BlockNumber !== undefined ? props.BlockNumber.trim() : "";
-    const quarterName = props.QuarterName_Arabic !== undefined ? props.QuarterName_Arabic.trim() : "";
+    const parcelNum = props.ParcelNumber !== undefined ? String(props.ParcelNumber).trim().toLowerCase() : "";
+    const blockNum = props.BlockNumber !== undefined ? String(props.BlockNumber).trim().toLowerCase() : "";
+    const quarterName = props.QuarterName_Arabic !== undefined ? props.QuarterName_Arabic.trim().toLowerCase() : "";
 
     const matchParcel = parcelInput === "" || parcelInput === parcelNum;
-    const matchBlock = blockInput === "" || blockInput.toLowerCase() === blockNum.toLowerCase();
-    const matchQuarter = quarterInput === "" || quarterInput.toLowerCase() === quarterName.toLowerCase();
+    const matchBlock = blockInput === "" || blockInput === blockNum;
+    const matchQuarter = quarterInput === "" || quarterInput === quarterName;
 
     if (matchParcel && matchBlock && matchQuarter) {
-      found = true;
       layer.openPopup();
-      map.fitBounds(layer.getBounds());
-    } else {
-      layer.closePopup();
+      map.setView(layer.getBounds().getCenter(), 17);
+      found = true;
     }
   });
 
   if (!found) {
-    alert("لم يتم العثور على نتائج مطابقة.");
+    alert("لم يتم العثور على مبنى بهذه البيانات.");
   }
 }
 
