@@ -299,7 +299,29 @@
       }
     }
 
+
+    const legend = L.control({ position: 'bottomright' });
+
+    legend.onAdd = function (map) {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += "<b>Legend</b><br>";
+      div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
+      div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
+      div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
+      div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
+      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
+      return div;
+    };
+
+    legend.addTo(map);
+
+    setTimeout(() => {
+      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
+    }, 1000);
+
     loadLayers();
   </script>
 </body>
 </html>
+
