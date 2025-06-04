@@ -274,8 +274,6 @@ function searchBuildings() {
   const blockInput = document.getElementById('block-input').value.trim().toLowerCase();
   const quarterInput = document.getElementById('quarter-input').value.trim().toLowerCase();
 
-  console.log("بحث عن:", { parcelInput, blockInput, quarterInput });
-
   let found = false;
 
   buildingLayer.eachLayer(function(layer) {
@@ -283,7 +281,7 @@ function searchBuildings() {
 
     const parcelNum = props.ParcelNumber !== undefined ? String(props.ParcelNumber).trim().toLowerCase() : "";
     const blockNum = props.BlockNumber !== undefined ? String(props.BlockNumber).trim().toLowerCase() : "";
-    const quarterName = props.QuarterName_Arabic !== undefined ? props.QuarterName_Arabic.trim().toLowerCase() : "";
+    const quarterName = props.QuarterName !== undefined ? props.QuarterName.trim().toLowerCase() : "";
 
     const matchParcel = parcelInput === "" || parcelInput === parcelNum;
     const matchBlock = blockInput === "" || blockInput === blockNum;
@@ -300,7 +298,6 @@ function searchBuildings() {
     alert("لم يتم العثور على مبنى بهذه البيانات.");
   }
 }
-
 
     const legend = L.control({ position: 'bottomright' });
 
