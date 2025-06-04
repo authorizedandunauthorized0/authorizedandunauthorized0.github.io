@@ -270,33 +270,39 @@
     }
 
 function searchBuildings() {
-  const parcelInput = document.getElementById("parcel-input").value.trim();
-  const blockInput = document.getElementById("block-input").value.trim();
-  const quarterInput = document.getElementById("quarter-input").value.trim();
-
-  if (!buildingLayer) return;
+  const parcelInput = document.getElementById('parcel-input').value.trim();
+  const blockInput = document.getElementById('block-input').value.trim();
+  const quarterInput = document.getElementById('quarter-input').value.trim();
 
   let found = false;
 
-  buildingLayer.eachLayer(function (layer) {
+  buildingLayer.eachLayer(function(layer) {
     const props = layer.feature.properties;
 
-    // المقارنات الدقيقة حسب القيم المُدخلة فقط
-    const matchParcel = parcelInput === "" || (props.ParcelNumber !== undefined && Number(parcelInput) === Number(props.ParcelNumber));
-    const matchBlock = blockInput === "" || (props.BlockNumber !== undefined && blockInput === props.BlockNumber.trim());
-    const matchQuarter = quarterInput === "" || (props.QuarterName_Arabic !== undefined && quarterInput === props.QuarterName_Arabic.trim());
+    // تحويل القيم إلى نصوص مقروءة مع حذف المسافات وتحويلها لأحرف صغيرة للمقارنة العادلة
+    const parcelNum = props.ParcelNumber !== undefined ? String(props.ParcelNumber).trim() : "";
+    const blockNum = props.BlockNumber !== undefined ? props.BlockNumber.trim() : "";
+    const quarterName = props.QuarterName_Arabic !== undefined ? props.QuarterName_Arabic.trim() : "";
+
+    // مطابقة الأرقام مع تجاهل حالة الأحرف والمسافات
+    const matchParcel = parcelInput === "" || parcelInput === parcelNum;
+    const matchBlock = blockInput === "" || blockInput.toLowerCase() === blockNum.toLowerCase();
+    const matchQuarter = quarterInput === "" || quarterInput.toLowerCase() === quarterName.toLowerCase();
 
     if (matchParcel && matchBlock && matchQuarter) {
-      map.setView(layer.getBounds().getCenter(), 17);
-      layer.openPopup();
       found = true;
+      layer.openPopup();
+      map.fitBounds(layer.getBounds());
+    } else {
+      layer.closePopup();
     }
   });
 
   if (!found) {
-    alert("لم يتم العثور على نتيجة تطابق المدخلات.");
+    alert("لم يتم العثور على نتائج مطابقة.");
   }
 }
+
 
     const legend = L.control({ position: 'bottomright' });
 
