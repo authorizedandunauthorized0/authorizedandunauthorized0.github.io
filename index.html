@@ -45,12 +45,22 @@
     }
 
     .legend {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
       background: white;
       padding: 10px;
       line-height: 1.5;
       color: #333;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      font-size: 14px;
+    }
+
+    .legend h4 {
+      margin: 0 0 5px 0;
+      font-size: 16px;
     }
 
     .legend i {
@@ -60,6 +70,7 @@
       margin-right: 8px;
       vertical-align: middle;
       opacity: 0.7;
+      border: 1px solid transparent;
     }
 
     .search-box {
@@ -151,6 +162,17 @@
 
   <div id="map"></div>
 
+  <!-- Legend -->
+  <div class="legend" id="map-legend">
+    <h4>Map Legend</h4>
+    <div><i style="background: rgb(225, 225, 225); border:1px solid rgb(168, 168, 168);"></i> Buildings</div>
+    <div><i style="background: rgb(158, 170, 155);"></i> Internal Streets</div>
+    <div><i style="background: rgb(82, 93, 79);"></i> External Streets</div>
+    <div><i style="background: black;"></i> Al-Nubani Farm Boundary</div>
+    <div><i style="background: rgb(189, 214, 175); border:1px solid gray;"></i> Structural Plan</div>
+    <div><i style="background: rgb(143, 188, 112); border:1px solid gray;"></i> Parcels</div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     var map = L.map('map').setView([32.0478311, 35.1635749], 17);
@@ -191,37 +213,37 @@ const styles = {
     fillColor: 'rgb(143, 188, 112)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.2
+    fillOpacity: 0.3
   },
   'Block_Mazare2.json': { 
     fillColor: 'rgb(143, 188, 112)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.2
+    fillOpacity: 0.3
   },
   'Block_Mazare3.geojson': { 
     fillColor: 'rgb(143, 188, 112)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.2
+    fillOpacity: 0.3
   },
   'Block_Mazare4.geojson': { 
     fillColor: 'rgb(143, 188, 112)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.2
+    fillOpacity: 0.3
   },
   'Block_Mazare5.geojson': { 
     fillColor: 'rgb(143, 188, 112)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.2
+    fillOpacity: 0.3
   },
   'Block_Mazare6.geojson': { 
     fillColor: 'rgb(143, 188, 112)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.2
+    fillOpacity: 0.3
   }
 };
 
