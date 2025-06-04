@@ -268,30 +268,37 @@
         }
       });
     }
+
     function searchBuildings() {
-      const parcel = document.getElementById("parcel-input").value.trim();
+      const parcel = document.getElementById("parcel-input").value.trim().toLowerCase();
       const block = document.getElementById("block-input").value.trim().toLowerCase();
       const quarter = document.getElementById("quarter-input").value.trim().toLowerCase();
+
       if (!buildingLayer) return;
+
       let found = false;
+
       buildingLayer.eachLayer(function (layer) {
         const props = layer.feature.properties;
-        const propParcel = props.ParcelNumber !== undefined ? props.ParcelNumber.toString().trim() : "";
-        const propBlock = props.BlockNumber !== undefined ? props.BlockNumber.toString().trim().toLowerCase() : "";
-        const propQuarter = props.QuarterName !== undefined ? props.QuarterName.trim().toLowerCase() : "";
-        const matchParcel = parcel === "" || parcel === propParcel;
-        const matchBlock = block === "" || propBlock.includes(block);
-        const matchQuarter = quarter === "" || propQuarter.includes(quarter);
+
+        // نستخدم QuarterName بدل QuarterName_Arabic لأن بيانات المباني تحتويه
+        const matchParcel = parcel === "" || (props.ParcelNumber && props.ParcelNumber.toString().trim().toLowerCase().includes(parcel));
+        const matchBlock = block === "" || (props.BlockNumber && props.BlockNumber.toString().trim().toLowerCase().includes(block));
+        const matchQuarter = quarter === "" || (props.QuarterName && props.QuarterName.trim().toLowerCase().includes(quarter));
+
         if (matchParcel && matchBlock && matchQuarter) {
           map.setView(layer.getBounds().getCenter(), 17);
           layer.openPopup();
           found = true;
+          return;
         }
       });
+
       if (!found) {
-        alert("لم يتم العثور على أي مبنى يطابق البحث.");
+        alert("لم يتم العثور على المبنى بالمعايير المحددة.");
       }
     }
+
     loadLayers();
   </script>
 </body>
