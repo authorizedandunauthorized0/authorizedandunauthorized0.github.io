@@ -269,35 +269,24 @@
       });
     }
 
-function searchBuildings() {
-  const parcelInput = document.getElementById('parcel-input').value.trim().toLowerCase();
-  const blockInput = document.getElementById('block-input').value.trim().toLowerCase();
-  const quarterInput = document.getElementById('quarter-input').value.trim().toLowerCase();
+document.getElementById("searchButton").addEventListener("click", function () {
+  const inputParcel = document.getElementById("parcelNumber").value.trim().toLowerCase();
+  const inputBlock = document.getElementById("blockNumber").value.trim().toLowerCase();
+  const inputQuarter = document.getElementById("quarterName").value.trim().toLowerCase();
 
-  let found = false;
-
-  buildingLayer.eachLayer(function(layer) {
+  buildingsLayer.eachLayer(function (layer) {
     const props = layer.feature.properties;
+    const parcel = props.ParcelNumber ? props.ParcelNumber.trim().toLowerCase() : "";
+    const block = props.BlockNumber ? props.BlockNumber.trim().toLowerCase() : "";
+    const quarter = props.QuarterName ? props.QuarterName.trim().toLowerCase() : "";
 
-    const parcelNum = props.ParcelNumber !== undefined ? String(props.ParcelNumber).trim().toLowerCase() : "";
-    const blockNum = props.BlockNumber !== undefined ? String(props.BlockNumber).trim().toLowerCase() : "";
-    const quarterName = props.QuarterName !== undefined ? props.QuarterName.trim().toLowerCase() : "";
-
-    const matchParcel = parcelInput === "" || parcelInput === parcelNum;
-    const matchBlock = blockInput === "" || blockInput === blockNum;
-    const matchQuarter = quarterInput === "" || quarterInput === quarterName;
-
-    if (matchParcel && matchBlock && matchQuarter) {
+    if (parcel === inputParcel && block === inputBlock && quarter === inputQuarter) {
+      map.fitBounds(layer.getBounds());
       layer.openPopup();
-      map.setView(layer.getBounds().getCenter(), 17);
-      found = true;
     }
   });
+});
 
-  if (!found) {
-    alert("لم يتم العثور على مبنى بهذه البيانات.");
-  }
-}
 
     const legend = L.control({ position: 'bottomright' });
 
