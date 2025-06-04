@@ -274,17 +274,21 @@ function searchBuildings() {
   const blockInput = document.getElementById('block-input').value.trim();
   const quarterInput = document.getElementById('quarter-input').value.trim();
 
+  console.log("بحث عن:", { parcelInput, blockInput, quarterInput });
+
   let found = false;
 
   buildingLayer.eachLayer(function(layer) {
     const props = layer.feature.properties;
 
-    // تحويل القيم إلى نصوص مقروءة مع حذف المسافات وتحويلها لأحرف صغيرة للمقارنة العادلة
+    // طباعة خصائص الطبقة (للتأكد من الحقول والقيم)
+    console.log("خصائص الطبقة:", props);
+
+    // بقية الكود...
     const parcelNum = props.ParcelNumber !== undefined ? String(props.ParcelNumber).trim() : "";
     const blockNum = props.BlockNumber !== undefined ? props.BlockNumber.trim() : "";
     const quarterName = props.QuarterName_Arabic !== undefined ? props.QuarterName_Arabic.trim() : "";
 
-    // مطابقة الأرقام مع تجاهل حالة الأحرف والمسافات
     const matchParcel = parcelInput === "" || parcelInput === parcelNum;
     const matchBlock = blockInput === "" || blockInput.toLowerCase() === blockNum.toLowerCase();
     const matchQuarter = quarterInput === "" || quarterInput.toLowerCase() === quarterName.toLowerCase();
@@ -302,7 +306,6 @@ function searchBuildings() {
     alert("لم يتم العثور على نتائج مطابقة.");
   }
 }
-
 
     const legend = L.control({ position: 'bottomright' });
 
