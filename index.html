@@ -148,24 +148,24 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    var map = L.map('map').setView([32.0478311, 35.1635749], 15);
+    var map = L.map('map').setView([32.0478311, 35.1635749], 17);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
     const styles = {
-      'Mazare_Alnoubani.json': { color: '#000000', weight: 2, fillOpacity: 0 }, // أسود بدون تعبئة
-      'Urban_Master_Plan.json': { color: '#696969', weight: 2, fillOpacity: 0.25 }, // رمادي داكن مع تعبئة خفيفة
-      'Block_Mazare1.json': { color: '#8B4513', weight: 2, fillOpacity: 0.4 }, // بني داكن
-      'Block_Mazare2.json': { color: '#8B4513', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare3.geojson': { color: '#8B4513', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare4.geojson': { color: '#8B4513', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare5.geojson': { color: '#8B4513', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare6.geojson': { color: '#8B4513', weight: 2, fillOpacity: 0.4 },
-      'Buildings.geojson': { color: '#B22222', weight: 2, fillOpacity: 0.6 }, // أحمر داكن مع تعبئة
-      'Roads_InSide.json': { color: '#1E90FF', weight: 3 }, // أزرق ساطع
-      'Roads_OutSide.json': { color: '#104E8B', weight: 3 } // أزرق داكن
+      'Mazare_Alnoubani.json': { color:'rgb(0, 0, 0)', weight: 2, fillOpacity: 0 }, // أسود بدون تعبئة
+      'Urban_Master_Plan.json': { color: color: 'rgb(189, 214, 175)', weight: 2, fillOpacity: 0.3 },// رمادي داكن مع تعبئة خفيفة
+      'Block_Mazare1.json': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 }, // بني داكن
+      'Block_Mazare2.json': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare3.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare4.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare5.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare6.geojson': { color: 'rgb(143, 188, 112)', weight: 2, fillOpacity: 0.4 },
+      'Buildings.geojson': { color: 'rgb(168, 168, 168)', weight: 2, fillColor: 'rgb(225, 225, 225)', fillOpacity: 0.6 }, // المباني: الحدود والداخل
+      'Roads_InSide.json': { color:'rgb(158, 170, 155)', weight: 2 },
+      'Roads_OutSide.json': { color: 'rgb(82, 93, 79)', weight: 2 } 
     };
 
     const fileOrder = [
