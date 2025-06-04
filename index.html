@@ -270,9 +270,12 @@
     }
 
 document.getElementById("searchButton").addEventListener("click", function () {
+  // قراءة قيم البحث من حقول الإدخال وتحويلها لنصوص صغيرة بدون فراغات زائدة
   const inputParcel = document.getElementById("parcelNumber").value.trim().toLowerCase();
   const inputBlock = document.getElementById("blockNumber").value.trim().toLowerCase();
   const inputQuarter = document.getElementById("quarterName").value.trim().toLowerCase();
+
+  let found = false; // لتعقب إن وُجد المبنى
 
   buildingsLayer.eachLayer(function (layer) {
     const props = layer.feature.properties;
@@ -281,12 +284,18 @@ document.getElementById("searchButton").addEventListener("click", function () {
     const quarter = props.QuarterName ? props.QuarterName.trim().toLowerCase() : "";
 
     if (parcel === inputParcel && block === inputBlock && quarter === inputQuarter) {
+      found = true;
+      // تكبير العرض إلى حدود المبنى
       map.fitBounds(layer.getBounds());
+      // فتح البوب أب للمبنى
       layer.openPopup();
     }
   });
-});
 
+  if (!found) {
+    alert("لم يتم العثور على مبنى يطابق المعايير المدخلة.");
+  }
+});
 
     const legend = L.control({ position: 'bottomright' });
 
