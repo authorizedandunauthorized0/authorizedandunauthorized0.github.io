@@ -269,53 +269,35 @@
       });
     }
 
-document.getElementById("searchButton").addEventListener("click", function () {
-  // قراءة قيم البحث من حقول الإدخال وتحويلها لنصوص صغيرة بدون فراغات زائدة
-  const inputParcel = document.getElementById("parcelNumber").value.trim().toLowerCase();
-  const inputBlock = document.getElementById("blockNumber").value.trim().toLowerCase();
-  const inputQuarter = document.getElementById("quarterName").value.trim().toLowerCase();
+    function searchBuildings() {
+      const parcel = document.getElementById("parcel-input").value.trim().toLowerCase();
+      const block = document.getElementById("block-input").value.trim().toLowerCase();
+      const quarter = document.getElementById("quarter-input").value.trim().toLowerCase();
 
-  let found = false; // لتعقب إن وُجد المبنى
+      if (!buildingLayer) return;
 
-  buildingsLayer.eachLayer(function (layer) {
-    const props = layer.feature.properties;
-    const parcel = props.ParcelNumber ? props.ParcelNumber.trim().toLowerCase() : "";
-    const block = props.BlockNumber ? props.BlockNumber.trim().toLowerCase() : "";
-    const quarter = props.QuarterName ? props.QuarterName.trim().toLowerCase() : "";
+      let found = false;
 
-    if (parcel === inputParcel && block === inputBlock && quarter === inputQuarter) {
-      found = true;
-      // تكبير العرض إلى حدود المبنى
-      map.fitBounds(layer.getBounds());
-      // فتح البوب أب للمبنى
-      layer.openPopup();
+      buildingLayer.eachLayer(function (layer) {
+        const props = layer.feature.properties;
+
+        // نستخدم QuarterName بدل QuarterName_Arabic لأن بيانات المباني تحتويه
+        const matchParcel = parcel === "" || (props.ParcelNumber && props.ParcelNumber.toString().trim().toLowerCase().includes(parcel));
+        const matchBlock = block === "" || (props.BlockNumber && props.BlockNumber.toString().trim().toLowerCase().includes(block));
+        const matchQuarter = quarter === "" || (props.QuarterName && props.QuarterName.trim().toLowerCase().includes(quarter));
+
+        if (matchParcel && matchBlock && matchQuarter) {
+          map.setView(layer.getBounds().getCenter(), 17);
+          layer.openPopup();
+          found = true;
+          return;
+        }
+      });
+
+      if (!found) {
+        alert("لم يتم العثور على المبنى بالمعايير المحددة.");
+      }
     }
-  });
-
-  if (!found) {
-    alert("لم يتم العثور على مبنى يطابق المعايير المدخلة.");
-  }
-});
-
-    const legend = L.control({ position: 'bottomright' });
-
-    legend.onAdd = function (map) {
-      const div = L.DomUtil.create('div', 'legend');
-      div.innerHTML += "<b>Legend</b><br>";
-      div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
-      div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
-      div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
-      div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
-      return div;
-    };
-
-    legend.addTo(map);
-
-    setTimeout(() => {
-      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
-    }, 1000);
 
     loadLayers();
   </script>
