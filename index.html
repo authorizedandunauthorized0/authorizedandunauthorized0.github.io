@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    /* ... نفس التنسيقات السابقة ... */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -44,12 +45,22 @@
     }
 
     .legend {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
       background: white;
       padding: 10px;
       line-height: 1.5;
       color: #333;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      font-size: 14px;
+    }
+
+    .legend h4 {
+      margin: 0 0 5px 0;
+      font-size: 16px;
     }
 
     .legend i {
@@ -59,6 +70,7 @@
       margin-right: 8px;
       vertical-align: middle;
       opacity: 0.7;
+      border: 1px solid transparent;
     }
 
     .search-box {
@@ -70,6 +82,9 @@
       padding: 10px;
       border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      display: flex;
+      gap: 5px;
+      align-items: center;
     }
 
     .search-box input {
@@ -80,6 +95,14 @@
 
     .search-box button {
       padding: 5px 10px;
+      background-color: #0057b8;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .search-box button:hover {
+      background-color: #003f8a;
     }
 
     .leaflet-control-zoom {
@@ -129,6 +152,7 @@
     <input type="text" id="block-input" placeholder="BlockNumber" />
     <input type="text" id="quarter-input" placeholder="QuarterName_Arabic" />
     <button onclick="searchBuildings()">بحث</button>
+    <button onclick="clearSearch()">مسح</button>
   </div>
 
   <div class="chart-box">
@@ -138,27 +162,91 @@
 
   <div id="map"></div>
 
+  <!-- Legend -->
+  <div class="legend" id="map-legend">
+    <h4>Map Legend</h4>
+    <div><i style="background: rgb(225, 225, 225); border:1px solid rgb(168, 168, 168);"></i> Buildings</div>
+    <div><i style="background: rgb(158, 170, 155);"></i> Internal Streets</div>
+    <div><i style="background: rgb(82, 93, 79);"></i> External Streets</div>
+    <div><i style="background: black;"></i> Al-Nubani Farm Boundary</div>
+    <div><i style="background: rgb(189, 214, 175); border:1px solid gray;"></i> Structural Plan</div>
+    <div><i style="background: rgb(143, 188, 112); border:1px solid gray;"></i> Parcels</div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    var map = L.map('map').setView([32.0478311, 35.1635749], 14);
+    var map = L.map('map').setView([32.0478311, 35.1635749], 17);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    const styles = {
-      'Mazare_Alnoubani.json': { color: 'black', weight: 2, fillOpacity: 0 },
-      'Urban_Master_Plan.json': { color: 'gray', weight: 2, fillOpacity: 0.3 },
-      'Block_Mazare1.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare2.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare3.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare4.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare5.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Block_Mazare6.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
-      'Buildings.geojson': { color: 'brown', weight: 2, fillOpacity: 0.6 },
-      'Roads_InSide.json': { color: 'black', weight: 2 },
-      'Roads_OutSide.json': { color: 'black', weight: 2 }
-    };
+const styles = {
+  'Buildings.geojson': { 
+    fillColor: 'rgb(225, 225, 225)',
+    color: 'rgb(168, 168, 168)',
+    weight: 2,
+    fillOpacity: 0.3
+  },
+  'Roads_InSide.json': { 
+    color: 'rgb(158, 170, 155)',
+    weight: 2,
+    fillOpacity: 0
+  },
+  'Roads_OutSide.json': { 
+    color: 'rgb(82, 93, 79)',
+    weight: 2,
+    fillOpacity: 0
+  },
+  'Mazare_Alnoubani.json': { 
+    color: 'rgb(0, 0, 0)',
+    weight: 2,
+    fillOpacity: 0 // شفافية كاملة
+  },
+  'Urban_Master_Plan.json': { 
+    fillColor: 'rgb(189, 214, 175)',
+    color: 'gray',
+    weight: 2,
+    fillOpacity: 0.2
+  },
+  'Block_Mazare1.json': { 
+    fillColor: 'rgb(143, 188, 112)',
+    color: 'gray',
+    weight: 2,
+    fillOpacity: 0.3
+  },
+  'Block_Mazare2.json': { 
+    fillColor: 'rgb(143, 188, 112)',
+    color: 'gray',
+    weight: 2,
+    fillOpacity: 0.3
+  },
+  'Block_Mazare3.geojson': { 
+    fillColor: 'rgb(143, 188, 112)',
+    color: 'gray',
+    weight: 2,
+    fillOpacity: 0.3
+  },
+  'Block_Mazare4.geojson': { 
+    fillColor: 'rgb(143, 188, 112)',
+    color: 'gray',
+    weight: 2,
+    fillOpacity: 0.3
+  },
+  'Block_Mazare5.geojson': { 
+    fillColor: 'rgb(143, 188, 112)',
+    color: 'gray',
+    weight: 2,
+    fillOpacity: 0.3
+  },
+  'Block_Mazare6.geojson': { 
+    fillColor: 'rgb(143, 188, 112)',
+    color: 'gray',
+    weight: 2,
+    fillOpacity: 0.3
+  }
+};
+
 
     const fileOrder = [
       'Mazare_Alnoubani.json',
@@ -177,6 +265,7 @@
     const overlayLayers = {};
     let buildingLayer;
     let statusCounts = {};
+    let lastFoundLayer = null; // لتخزين الطبقة المفتوحة حاليا
 
     async function loadLayers() {
       for (const file of fileOrder) {
@@ -274,54 +363,47 @@
       const block = document.getElementById("block-input").value.trim().toLowerCase();
       const quarter = document.getElementById("quarter-input").value.trim().toLowerCase();
 
-      if (!buildingLayer) return;
+      if (!parcel && !block && !quarter) {
+        alert('يرجى إدخال قيمة على الأقل في أحد الحقول للبحث.');
+        return;
+      }
 
       let found = false;
 
       buildingLayer.eachLayer(function (layer) {
         const props = layer.feature.properties;
-
-        // نستخدم QuarterName بدل QuarterName_Arabic لأن بيانات المباني تحتويه
-        const matchParcel = parcel === "" || (props.ParcelNumber && props.ParcelNumber.toString().trim().toLowerCase() === parcel);
-        const matchBlock = block === "" || (props.BlockNumber && props.BlockNumber.toString().trim().toLowerCase().includes(block));
-        const matchQuarter = quarter === "" || (props.QuarterName && props.QuarterName.trim().toLowerCase().includes(quarter));
+        const matchParcel = parcel ? (props.ParcelNumber && props.ParcelNumber.toString().toLowerCase().includes(parcel)) : true;
+        const matchBlock = block ? (props.BlockNumber && props.BlockNumber.toString().toLowerCase().includes(block)) : true;
+        const matchQuarter = quarter ? (props.QuarterName && props.QuarterName.toString().toLowerCase().includes(quarter)) : true;
 
         if (matchParcel && matchBlock && matchQuarter) {
-          map.setView(layer.getBounds().getCenter(), 17);
+          if (lastFoundLayer) lastFoundLayer.closePopup();
+          lastFoundLayer = layer;
           layer.openPopup();
+          map.fitBounds(layer.getBounds());
           found = true;
           return;
         }
       });
 
       if (!found) {
-        alert("لم يتم العثور على المبنى بالمعايير المحددة.");
+        alert("لم يتم العثور على مبنى مطابق للبحث.");
       }
     }
 
+    // دالة لمسح البحث ومسح أي نوافذ منبثقة مفتوحة
+    function clearSearch() {
+      document.getElementById("parcel-input").value = '';
+      document.getElementById("block-input").value = '';
+      document.getElementById("quarter-input").value = '';
 
-    const legend = L.control({ position: 'bottomright' });
-
-    legend.onAdd = function (map) {
-      const div = L.DomUtil.create('div', 'legend');
-      div.innerHTML += "<b>Legend</b><br>";
-      div.innerHTML += '<i style="background: black"></i> Mazare Alnoubani<br>';
-      div.innerHTML += '<i style="background: gray"></i> Urban Master Plan<br>';
-      div.innerHTML += '<i style="background: #D2B48C"></i> Block Mazare (1–6)<br>';
-      div.innerHTML += '<i style="background: brown"></i> Buildings<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Inside<br>';
-      div.innerHTML += '<i style="background: black"></i> Roads Outside<br>';
-      return div;
-    };
-
-    legend.addTo(map);
-
-    setTimeout(() => {
-      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
-    }, 1000);
+      if (lastFoundLayer) {
+        lastFoundLayer.closePopup();
+        lastFoundLayer = null;
+      }
+    }
 
     loadLayers();
   </script>
 </body>
 </html>
-
