@@ -163,11 +163,11 @@
   <div id="map"></div>
 
   <!-- Legend -->
-  <div class="legend" id="map-legend">
+  <div class="legend" id="legend">
     <h4>Map Legend</h4>
     <div><i style="background: rgb(192, 192, 192); border:1px solid rgb(234, 234, 234);"></i> Buildings</div>
-    <div><i style="background: rgb(187, 195, 184);"></i> Roads Inside</div>
-    <div><i style="background: rgb(109, 116, 106);"></i> Roads Outside</div>
+    <div><i style="background: rgb(138, 145, 135);"></i> Roads Inside</div>
+    <div><i style="background: rgb(76, 76, 76);"></i> Roads Outside</div>
     <div><i style="background: black;"></i> Mazare Alnoubani</div>
     <div><i style="background: rgb(210, 226, 199); border:1px solid gray;"></i> Urban Master Plan</div>
     <div><i style="background: rgb(166, 203, 143); border:1px solid gray;"></i> Block mazare(1-6)</div>
@@ -183,18 +183,18 @@
 
 const styles = {
   'Buildings.geojson': { 
-    fillColor: 'rgb(225, 225, 225)',
-    color: 'rgb(168, 168, 168)',
+    fillColor: 'rgb(192, 192, 192)',
+    color: 'rgb(234, 234, 234)',
     weight: 2,
-    fillOpacity: 0.3
+    fillOpacity: 0.5
   },
   'Roads_InSide.json': { 
-    color: 'rgb(158, 170, 155)',
+    color: 'rgb(138, 145, 135)',
     weight: 2,
     fillOpacity: 0
   },
   'Roads_OutSide.json': { 
-    color: 'rgb(82, 93, 79)',
+    color: 'rgb(76, 76, 76)',
     weight: 2,
     fillOpacity: 0
   },
@@ -204,43 +204,43 @@ const styles = {
     fillOpacity: 0 // شفافية كاملة
   },
   'Urban_Master_Plan.json': { 
-    fillColor: 'rgb(189, 214, 175)',
+    fillColor: 'rgb(210, 226, 199)',
     color: 'gray',
     weight: 2,
     fillOpacity: 0.2
   },
   'Block_Mazare1.json': { 
-    fillColor: 'rgb(143, 188, 112)',
+    fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
     fillOpacity: 0.3
   },
   'Block_Mazare2.json': { 
-    fillColor: 'rgb(143, 188, 112)',
+    fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
     fillOpacity: 0.3
   },
   'Block_Mazare3.geojson': { 
-    fillColor: 'rgb(143, 188, 112)',
+    fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
     fillOpacity: 0.3
   },
   'Block_Mazare4.geojson': { 
-    fillColor: 'rgb(143, 188, 112)',
+    fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
     fillOpacity: 0.3
   },
   'Block_Mazare5.geojson': { 
-    fillColor: 'rgb(143, 188, 112)',
+    fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
     fillOpacity: 0.3
   },
   'Block_Mazare6.geojson': { 
-    fillColor: 'rgb(143, 188, 112)',
+    fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
     fillOpacity: 0.3
