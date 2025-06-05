@@ -156,7 +156,7 @@
   </div>
 
   <div class="chart-box">
-    <p>إجمالي عدد المباني: <span id="total-count">0</span></p>
+    <p>Total number of buildings: <span id="total-count">0</span></p>
     <canvas id="statusChart"></canvas>
   </div>
 
@@ -186,7 +186,7 @@ const styles = {
     fillColor: 'rgb(192, 192, 192)',
     color: 'rgb(234, 234, 234)',
     weight: 2,
-    fillOpacity: 0.5
+    fillOpacity: 1
   },
   'Roads_InSide.json': { 
     color: 'rgb(138, 145, 135)',
@@ -213,37 +213,37 @@ const styles = {
     fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.3
+    fillOpacity: 0.6
   },
   'Block_Mazare2.json': { 
     fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.3
+    fillOpacity: 0.6
   },
   'Block_Mazare3.geojson': { 
     fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.3
+    fillOpacity: 0.6
   },
   'Block_Mazare4.geojson': { 
     fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.3
+    fillOpacity: 0.6
   },
   'Block_Mazare5.geojson': { 
     fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.3
+    fillOpacity: 0.6
   },
   'Block_Mazare6.geojson': { 
     fillColor: 'rgb(166, 203, 143)',
     color: 'gray',
     weight: 2,
-    fillOpacity: 0.3
+    fillOpacity: 0.6
   }
 };
 
@@ -342,7 +342,7 @@ const styles = {
             },
             title: {
               display: true,
-              text: 'نسبة حالة المباني'
+              text: 'Percentage of un/autharized buildings'
             },
             tooltip: {
               callbacks: {
@@ -402,6 +402,9 @@ const styles = {
         lastFoundLayer = null;
       }
     }
+    setTimeout(() => {
+      L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
+    }, 1000);
 
     loadLayers();
   </script>
