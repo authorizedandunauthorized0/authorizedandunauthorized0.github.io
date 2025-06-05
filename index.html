@@ -181,71 +181,19 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-const styles = {
-  'Buildings.geojson': { 
-    fillColor: 'brown',
-    color: 'brown',
-    weight: 2,
-    fillOpacity: 1
-  },
-  'Roads_InSide.json': { 
-    color: 'black',
-    weight: 2,
-    fillOpacity: 0
-  },
-  'Roads_OutSide.json': { 
-    color: 'black',
-    weight: 2,
-    fillOpacity: 0
-  },
-  'Mazare_Alnoubani.json': { 
-    color: 'rgb(0, 0, 0)',
-    weight: 2,
-    fillOpacity: 0 // شفافية كاملة
-  },
-  'Urban_Master_Plan.json': { 
-    fillColor: '#D2B48C',
-    color: 'gray',
-    weight: 2,
-    fillOpacity: 0.7
-  },
-  'Block_Mazare1.json': { 
-    fillColor: '#D2B48C',
-    color: 'gray',
-    weight: 2,
-    fillOpacity: 0.6
-  },
-  'Block_Mazare2.json': { 
-    fillColor: '#D2B48C',
-    color: 'gray',
-    weight: 2,
-    fillOpacity: 0.6
-  },
-  'Block_Mazare3.geojson': { 
-    fillColor: '#D2B48C',
-    color: 'gray',
-    weight: 2,
-    fillOpacity: 0.6
-  },
-  'Block_Mazare4.geojson': { 
-    fillColor: '#D2B48C',
-    color: 'gray',
-    weight: 2,
-    fillOpacity: 0.6
-  },
-  'Block_Mazare5.geojson': { 
-    fillColor: '#D2B48C',
-    color: 'gray',
-    weight: 2,
-    fillOpacity: 0.6
-  },
-  'Block_Mazare6.geojson': { 
-    fillColor: '#D2B48C',
-    color: 'gray',
-    weight: 2,
-    fillOpacity: 0.6
-  }
-};
+    const styles = {
+      'Mazare_Alnoubani.json': { color: 'black', weight: 2, fillOpacity: 0 },
+      'Urban_Master_Plan.json': { color: 'gray', weight: 2, fillOpacity: 0.3 },
+      'Block_Mazare1.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare2.json': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare3.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare4.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare5.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Block_Mazare6.geojson': { color: '#D2B48C', weight: 2, fillOpacity: 0.4 },
+      'Buildings.geojson': { color: 'brown', weight: 2, fillOpacity: 0.6 },
+      'Roads_InSide.json': { color: 'black', weight: 2 },
+      'Roads_OutSide.json': { color: 'black', weight: 2 }
+    };
 
 
     const fileOrder = [
