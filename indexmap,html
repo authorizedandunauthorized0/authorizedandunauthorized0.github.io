@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to the Interactive Map</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f0f0, #e2e2e2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    p {
+      font-size: 1.1em;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .button {
+      padding: 12px 25px;
+      font-size: 1em;
+      background-color: #2a7de1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      text-decoration: none;
+    }
+
+    .button:hover {
+      background-color: #1f65b1;
+    }
+
+    .names {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #666;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Welcome to Our Interactive Mapping Platform</h1>
+    <p>This platform is designed to help residents of Mazari' al-Nubani village explore the status of buildings located inside and outside the structural plan area. Users can identify whether their building is affected or compliant by searching or clicking on it directly. All details about the building will be displayed.</p>
+    <p>تم تصميم هذه المنصة لمساعدة سكان قرية مزارع النوباني في معرفة حالة مبانيهم الواقعة داخل وخارج حدود المخطط الهيكلي، سواء كانت مخالفة أو غير مخالفة، حيث يمكن للمستخدم البحث عن المبنى أو الضغط عليه لعرض جميع المعلومات الخاصة به.</p>
+    <a class="button" href="https://authorizedandunauthorized0.github.io/">Enter Map</a>
+    <div class="names">
+      <p>Developed by:</p>
+      <p>Sema Atrash | Razan Khassib | Ru’a Mansour</p>
+    </div>
+  </div>
+</body>
+
+</html>
