@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* ... نفس التنسيقات السابقة ... */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -42,6 +41,14 @@
       font-size: 20px;
       margin: 0;
       text-align: center;
+    }
+
+    .top-bar .creators {
+      position: absolute;
+      top: 40px;
+      right: 10px;
+      font-size: 12px;
+      color: white;
     }
 
     .legend {
@@ -101,6 +108,7 @@
       cursor: pointer;
       border-radius: 4px;
     }
+
     .search-box button:hover {
       background-color: #003f8a;
     }
@@ -145,6 +153,7 @@
   <div class="top-bar">
     <img src="https://raw.githubusercontent.com/authorizedandunauthorized0/authorizedandunauthorized0.github.io/main/university-logo.png" alt="شعار الجامعة" />
     <h1>Map of Authorized and Unauthorized Buildings in Mazare' Al-Noubani</h1>
+    <div class="creators">رؤى منصور، رزان خصيب، سمة الأطرش</div>
   </div>
 
   <div class="search-box">
@@ -163,7 +172,7 @@
   <div id="map"></div>
 
   <!-- Legend -->
-  <div class="legend" id=" map legend">
+  <div class="legend" id="map-legend">
     <h4>Legend</h4>
     <div><i style="background: brown;"></i> Buildings</div>
     <div><i style="background: black;"></i> Roads Inside</div>
@@ -195,7 +204,6 @@
       'Roads_OutSide.json': { color: 'black', weight: 2 }
     };
 
-
     const fileOrder = [
       'Mazare_Alnoubani.json',
       'Block_Mazare6.geojson',
@@ -213,7 +221,7 @@
     const overlayLayers = {};
     let buildingLayer;
     let statusCounts = {};
-    let lastFoundLayer = null; // لتخزين الطبقة المفتوحة حاليا
+    let lastFoundLayer = null;
 
     async function loadLayers() {
       for (const file of fileOrder) {
@@ -339,7 +347,6 @@
       }
     }
 
-    // دالة لمسح البحث ومسح أي نوافذ منبثقة مفتوحة
     function clearSearch() {
       document.getElementById("parcel-input").value = '';
       document.getElementById("block-input").value = '';
@@ -350,6 +357,7 @@
         lastFoundLayer = null;
       }
     }
+
     setTimeout(() => {
       L.control.layers(null, overlayLayers, { collapsed: true, position: 'topright' }).addTo(map);
     }, 1000);
